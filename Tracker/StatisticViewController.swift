@@ -1,19 +1,18 @@
 //
-//  ViewController.swift
+//  StatisticViewController.swift
 //  Tracker
 //
-//  Created by Рустам Ханахмедов on 08.09.2025.
+//  Created by Рустам Ханахмедов on 15.09.2025.
 //
 
 import UIKit
 
-class ViewController: UIViewController {
-
+class StatisticViewController: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
-
-
+    
+    
 }
-

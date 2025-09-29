@@ -99,32 +99,8 @@ final class TrackersViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.searchResultsUpdater = self
-        
+        searchController.searchBar.placeholder = Constants.searchPlaceholder
         let searchTextField = searchController.searchBar.searchTextField
-        
-        // Настройка через константы
-        searchTextField.font = UIFont.systemFont(
-            ofSize: Constants.Layout.searchTextFieldFontSize,
-            weight: .regular
-        )
-        searchTextField.textColor = Constants.Colors.searchText
-        
-        searchTextField.leftView?.tintColor = .ypBlack
-        searchTextField.backgroundColor = Constants.Colors.searchBackground
-        searchTextField.layer.cornerRadius = Constants.Layout.searchTextFieldCornerRadius
-        searchTextField.layer.masksToBounds = true
-        
-        // Кастомный placeholder
-        searchTextField.attributedPlaceholder = NSAttributedString(
-            string: Constants.searchPlaceholder,
-            attributes: [
-                .foregroundColor: Constants.Colors.searchPlaceholder,
-                .font: UIFont.systemFont(
-                    ofSize: Constants.Layout.searchTextFieldFontSize,
-                    weight: .regular
-                )
-            ]
-        )
         
         return searchController
     }()
@@ -271,7 +247,10 @@ final class TrackersViewController: UIViewController {
             
             // Placeholder Image
             placeholderImageView.widthAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
-            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize)
+            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
+            
+            //datePicker
+            datePicker.widthAnchor.constraint(equalToConstant: 100)
         ])
     }
     

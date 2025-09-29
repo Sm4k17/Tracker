@@ -57,6 +57,7 @@ final class TrackersViewController: UIViewController {
             static let searchPlaceholder: UIColor = .ypGray
             static let searchText: UIColor = .ypBlack
             static let dateButtonText: UIColor = .ypBlack
+            static let searchBackground: UIColor = .ypGrayS
         }
     }
     
@@ -108,8 +109,8 @@ final class TrackersViewController: UIViewController {
         )
         searchTextField.textColor = Constants.Colors.searchText
         
-        searchTextField.leftView?.tintColor = .ypGray
-        
+        searchTextField.leftView?.tintColor = .ypBlack
+        searchTextField.backgroundColor = Constants.Colors.searchBackground
         searchTextField.layer.cornerRadius = Constants.Layout.searchTextFieldCornerRadius
         searchTextField.layer.masksToBounds = true
         
@@ -217,11 +218,16 @@ final class TrackersViewController: UIViewController {
         navigationItem.leftBarButtonItem = addButton
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
+        // ✅ НАСТРОЙКА LARGE TITLE
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
         // Настройка внешнего вида navigation bar
         navigationController?.navigationBar.titleTextAttributes = [
             .foregroundColor: UIColor.ypBlack,
             .font: UIFont.systemFont(ofSize: 34, weight: .bold)
         ]
+        
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
         definesPresentationContext = true

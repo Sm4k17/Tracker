@@ -20,74 +20,112 @@ final class TrackersViewController: UIViewController {
         
         // Константы для размеров и отступов
         enum Layout {
-            static let datePickerWidth: CGFloat = 95
-            static let searchBarHeight: CGFloat = 36
-            static let searchBarTopInset: CGFloat = 10
-            static let searchBarHorizontalInset: CGFloat = 16
+            // Navigation
+            static let datePickerWidth: CGFloat = 77
+            static let datePickerHeight: CGFloat = 34
+            
+            // Content
             static let collectionViewTopInset: CGFloat = 16
+            
+            // Placeholder
             static let placeholderImageSize: CGFloat = 80
             static let placeholderSpacing: CGFloat = 8
+            
+            // COLLECTION VIEW CONSTANTS
+            static let collectionItemSpacing: CGFloat = 12
+            static let collectionLineSpacing: CGFloat = 16
+            static let collectionSectionInsetTop: CGFloat = 12
+            static let collectionSectionInsetLeft: CGFloat = 16
+            static let collectionSectionInsetBottom: CGFloat = 16
+            static let collectionSectionInsetRight: CGFloat = 16
+            static let collectionItemHeight: CGFloat = 148
+            static let collectionHeaderHeight: CGFloat = 18
+            static let collectionItemsPerRow: CGFloat = 2
+            
+            // КОНСТАНТЫ ДЛЯ SEARCH CONTROLLER
+            static let searchTextFieldCornerRadius: CGFloat = 10
+            static let searchTextFieldFontSize: CGFloat = 17
+            
+            // Вычисляемые константы
+            static var collectionTotalHorizontalInset: CGFloat {
+                collectionSectionInsetLeft + collectionSectionInsetRight + collectionItemSpacing
+            }
+        }
+        
+        // ЦВЕТА ДЛЯ ТЕКСТА
+        enum Colors {
+            static let searchPlaceholder: UIColor = .ypGray
+            static let searchText: UIColor = .ypBlack
+            static let dateButtonText: UIColor = .ypBlack
         }
     }
     
     // MARK: - UI Components
-    private lazy var navigationBar: UINavigationBar = {
-        let bar = UINavigationBar()
-        bar.barTintColor = .ypWhite
-        return bar
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .ypWhite
+        return view
     }()
     
     // Кнопка "+" в левой части navigation bar
     private lazy var addButton: UIBarButtonItem = {
         let button = UIBarButtonItem(
             image: UIImage(systemName: Constants.addButtonImageName),
-            style: .plain,
-            target: self,
-            action: #selector(didTapAddButton)
+            primaryAction: UIAction { [weak self] _ in
+                self?.didTapAddButton()
+            }
         )
         button.tintColor = .ypBlack
         return button
     }()
     
-    // DatePicker для выбора даты в правой части navigation bar
+    // Основной DatePicker
     private lazy var datePicker: UIDatePicker = {
-        let picker = UIDatePicker()
-        picker.preferredDatePickerStyle = .compact
-        picker.datePickerMode = .date
-        picker.locale = Locale(identifier: "ru_CH")
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .compact
         
-        // Черный цвет текста даты
-        if #available(iOS 14.0, *) {
-            picker.tintColor = .ypBlack
-        } else {
-            picker.setValue(UIColor.ypBlack, forKey: "textColor")
-        }
-        return picker
+        datePicker.addAction(UIAction { [weak self] _ in
+            self?.dateChanged(datePicker)
+        }, for: .valueChanged)
+        
+        return datePicker
     }()
     
-    // Search bar для поиска трекеров
-    private lazy var searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.placeholder = Constants.searchPlaceholder
-        searchBar.searchBarStyle = .minimal
+    // SearchController для поиска трекеров
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchResultsUpdater = self
         
-        // Настройка внешнего вида
-        searchBar.searchTextField.backgroundColor = .clear
-        searchBar.tintColor = .systemBlue
-        searchBar.searchTextField.textColor = .ypBlack
-        searchBar.searchTextField.font = .systemFont(ofSize: 16)
+        let searchTextField = searchController.searchBar.searchTextField
         
-        // Убираем стандартные фоны
-        searchBar.backgroundImage = UIImage()
-        searchBar.setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
+        // Настройка через константы
+        searchTextField.font = UIFont.systemFont(
+            ofSize: Constants.Layout.searchTextFieldFontSize,
+            weight: .regular
+        )
+        searchTextField.textColor = Constants.Colors.searchText
         
-        // Кастомная граница
-        searchBar.searchTextField.layer.borderWidth = 1
-        searchBar.searchTextField.layer.borderColor = UIColor.systemGray4.cgColor
-        searchBar.searchTextField.layer.cornerRadius = 8
-        searchBar.searchTextField.layer.masksToBounds = true
+        searchTextField.leftView?.tintColor = .ypGray
         
-        return searchBar
+        searchTextField.layer.cornerRadius = Constants.Layout.searchTextFieldCornerRadius
+        searchTextField.layer.masksToBounds = true
+        
+        // Кастомный placeholder
+        searchTextField.attributedPlaceholder = NSAttributedString(
+            string: Constants.searchPlaceholder,
+            attributes: [
+                .foregroundColor: Constants.Colors.searchPlaceholder,
+                .font: UIFont.systemFont(
+                    ofSize: Constants.Layout.searchTextFieldFontSize,
+                    weight: .regular
+                )
+            ]
+        )
+        
+        return searchController
     }()
     
     // StackView для размещения иконки и текста плейсхолдера
@@ -122,9 +160,24 @@ final class TrackersViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         
+        // ИСПОЛЬЗУЕМ КОНСТАНТЫ ДЛЯ НАСТРОЙКИ LAYOUT
+        layout.minimumInteritemSpacing = Constants.Layout.collectionItemSpacing
+        layout.minimumLineSpacing = Constants.Layout.collectionLineSpacing
+        layout.sectionInset = UIEdgeInsets(
+            top: Constants.Layout.collectionSectionInsetTop,
+            left: Constants.Layout.collectionSectionInsetLeft,
+            bottom: Constants.Layout.collectionSectionInsetBottom,
+            right: Constants.Layout.collectionSectionInsetRight
+        )
+        
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collection.backgroundColor = .ypWhite
         collection.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        
+        // ДОБАВИМ ДЛЯ БУДУЩЕГО ИСПОЛЬЗОВАНИЯ
+        collection.showsVerticalScrollIndicator = false
+        collection.alwaysBounceVertical = true
+        
         return collection
     }()
     
@@ -132,6 +185,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupNavigationBar()
     }
     
     // MARK: - Setup
@@ -139,82 +193,112 @@ final class TrackersViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupViews()
         setupConstraints()
-        setupNavigationBarAppearance()
+        setupCollectionView()
+    }
+    
+    // MARK: - Date Formatter
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yy" // ✅ Формат "13.05.21"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
+    
+    private func setupCollectionView() {
+        //collectionView.delegate = self
+        //collectionView.dataSource = self
+        
+        collectionView.isHidden = true
+        placeholderStackView.isHidden = false
+    }
+    
+    private func setupNavigationBar() {
+        title = Constants.navigationTitle
+        navigationItem.leftBarButtonItem = addButton
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        // Настройка внешнего вида navigation bar
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        definesPresentationContext = true
     }
     
     private func setupViews() {
-        // Добавляем все view в иерархию и отключаем авто-размеры
-        [navigationBar, searchBar, placeholderStackView, collectionView].forEach {
+        // Обновленная иерархия
+        [contentView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         
-        // Добавляем элементы в stack view
+        [placeholderStackView, collectionView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview($0)
+        }
+        
         placeholderStackView.addArrangedSubview(placeholderImageView)
         placeholderStackView.addArrangedSubview(placeholderLabel)
-        
-        // Настройка navigation bar
-        let navItem = UINavigationItem(title: Constants.navigationTitle)
-        navItem.leftBarButtonItem = addButton
-        navItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        navigationBar.items = [navItem]
-        
-        // Настройка datePicker constraints
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Отступы для текста в search bar
-        searchBar.searchTextPositionAdjustment = UIOffset(horizontal: 8, vertical: 0)
-        
-        collectionView.isHidden = true
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Navigation Bar - привязываем к safe area сверху и по бокам
-            navigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            navigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            navigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            // Date Picker - фиксированная ширина
-            datePicker.widthAnchor.constraint(equalToConstant: Constants.Layout.datePickerWidth),
+            // Content View
+            contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
+                                             constant: Constants.Layout.collectionViewTopInset),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            // Search Bar - под navigation bar с отступами
-            searchBar.topAnchor.constraint(equalTo: navigationBar.bottomAnchor,
-                                          constant: Constants.Layout.searchBarTopInset),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor,
-                                              constant: Constants.Layout.searchBarHorizontalInset),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor,
-                                               constant: -Constants.Layout.searchBarHorizontalInset),
-            searchBar.heightAnchor.constraint(equalToConstant: Constants.Layout.searchBarHeight),
+            // Collection View внутри contentView
+            collectionView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            // Collection View - растягиваем на весь оставшийся экран
-            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor,
-                                               constant: Constants.Layout.collectionViewTopInset),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            // Placeholder Stack View
+            placeholderStackView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            placeholderStackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            // Placeholder Stack View - центрируем по всему экрану
-            placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
-            // Placeholder Image - фиксированный размер
+            // Placeholder Image
             placeholderImageView.widthAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
             placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize)
         ])
     }
     
-    // Отдельный метод для настройки внешнего вида navigation bar
-    private func setupNavigationBarAppearance() {
-        navigationBar.titleTextAttributes = [
-            .foregroundColor: UIColor.ypBlack,
-            .font: UIFont.systemFont(ofSize: 17, weight: .bold)
-        ]
+    private func calculateCollectionViewItemSize() -> CGSize {
+        let totalWidth = view.bounds.width - Constants.Layout.collectionTotalHorizontalInset
+        let itemWidth = totalWidth / Constants.Layout.collectionItemsPerRow
+        
+        return CGSize(
+            width: itemWidth,
+            height: Constants.Layout.collectionItemHeight
+        )
     }
     
     // MARK: - Actions
-    @objc private func didTapAddButton() {
+    private func didTapAddButton() {
         print("Add button tapped")
+    }
+    
+    private func dateChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Date changed: \(formattedDate)") // Будет "29.09.25"
+        
+        // Здесь будет логика фильтрации трекеров по дате
+    }
+}
+
+// MARK: - UISearchResultsUpdating
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else { return }
+        print("Search text: \(searchText)")
+        // Здесь будет логика фильтрации по поиску
     }
 }
 
@@ -226,3 +310,4 @@ final class TrackersViewController: UIViewController {
     return viewController
 }
 #endif
+

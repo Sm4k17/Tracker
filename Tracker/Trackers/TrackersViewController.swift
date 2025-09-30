@@ -70,8 +70,9 @@ final class TrackersViewController: UIViewController {
     
     // Кнопка "+" в левой части navigation bar
     private lazy var addButton: UIBarButtonItem = {
+        let buttonImage = UIImage(named: Constants.addButtonImageName) ?? UIImage(systemName: "plus")
         let button = UIBarButtonItem(
-            image: UIImage(systemName: Constants.addButtonImageName),
+            image: buttonImage,
             primaryAction: UIAction { [weak self] _ in
                 self?.didTapAddButton()
             }
@@ -85,6 +86,11 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
+        datePicker.backgroundColor = .ypGrayDate
+        datePicker.tintColor = .ypBlack
+        datePicker.layer.cornerRadius = 8
+        datePicker.layer.borderWidth = 0
+        datePicker.layer.borderColor = UIColor.ypGrayDate.cgColor
         
         datePicker.addAction(UIAction { [weak self] _ in
             self?.dateChanged(datePicker)
@@ -266,7 +272,9 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapAddButton() {
-        print("Add button tapped")
+        let creationVC = CreationTrackerViewController(delegate: self)
+        let navigationController = UINavigationController(rootViewController: creationVC)
+        present(navigationController, animated: true)
     }
     
     private func dateChanged(_ sender: UIDatePicker) {
@@ -284,6 +292,22 @@ extension TrackersViewController: UISearchResultsUpdating {
         guard let searchText = searchController.searchBar.text else { return }
         print("Search text: \(searchText)")
         // Здесь будет логика фильтрации по поиску
+    }
+}
+
+// MARK: - TrackerViewControllerDelegate
+extension TrackersViewController: TrackerViewControllerDelegate {
+    func didCreateNewTracker(_ tracker: Tracker) {
+        dismiss(animated: true)
+        print("Трекер создан: \(tracker.name)")
+        print("Тип: \(tracker.schedule.isEmpty ? "Нерегулярное событие" : "Привычка")")
+        print("Дни выполнения: \(tracker.schedule.map { $0.shortTitle })")
+        
+        // Здесь будем сохранять трекер и обновлять UI
+    }
+    
+    func didCancelTrackerCreation() {
+        dismiss(animated: true)
     }
 }
 

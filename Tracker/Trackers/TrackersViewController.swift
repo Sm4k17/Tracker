@@ -86,11 +86,8 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
-        datePicker.backgroundColor = .ypGrayDate
+        datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.tintColor = .ypBlack
-        datePicker.layer.cornerRadius = 8
-        datePicker.layer.borderWidth = 0
-        datePicker.layer.borderColor = UIColor.ypGrayDate.cgColor
         
         datePicker.addAction(UIAction { [weak self] _ in
             self?.dateChanged(datePicker)

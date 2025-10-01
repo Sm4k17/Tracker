@@ -17,32 +17,37 @@ final class ScheduleSelectionViewController: UIViewController {
         
         enum Layout {
             static let horizontalInset: CGFloat = 16
-            static let rowHeight: CGFloat = 75
-            static let buttonHeight: CGFloat = 60
+            static let buttonHeight: CGFloat = 75
             static let cornerRadius: CGFloat = 16
-            static let tableViewTopInset: CGFloat = 24
-            static let buttonBottomInset: CGFloat = 24
+            static let stackViewTopInset: CGFloat = 24
+            static let buttonBottomInset: CGFloat = 16
+            static let rowHeight: CGFloat = 75
+            static let separatorHeight: CGFloat = 1
         }
         
         enum Fonts {
             static let button: UIFont = .systemFont(ofSize: 16, weight: .medium)
+            static let dayLabel: UIFont = .systemFont(ofSize: 17, weight: .regular)
         }
         
         enum Colors {
             static let buttonText: UIColor = .ypWhite
+            static let stackViewBackground: UIColor = .ypBackgroundDay
+            static let dayLabel: UIColor = .ypBlack
+            static let separator: UIColor = .ypGray
+            static let switchTint: UIColor = .ypBlue
         }
     }
     
     // MARK: - UI Components
-    private lazy var tableView: UITableView = {
-        let table = UITableView()
-        table.register(ScheduleCell.self, forCellReuseIdentifier: "ScheduleCell")
-        table.backgroundColor = .ypWhite
-        table.separatorStyle = .singleLine
-        table.layer.cornerRadius = Constants.Layout.cornerRadius
-        table.layer.masksToBounds = true
-        table.isScrollEnabled = false
-        return table
+    private lazy var daysStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.backgroundColor = Constants.Colors.stackViewBackground
+        stackView.layer.cornerRadius = Constants.Layout.cornerRadius
+        stackView.layer.masksToBounds = true
+        return stackView
     }()
     
     private lazy var readyButton: UIButton = {
@@ -83,6 +88,7 @@ final class ScheduleSelectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupDays()
     }
     
     // MARK: - Setup
@@ -96,176 +102,107 @@ final class ScheduleSelectionViewController: UIViewController {
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        // Убираем кнопку назад
         navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
     }
     
     private func setupViews() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        view.addSubview(tableView)
+        view.addSubview(daysStackView)
         view.addSubview(readyButton)
     }
     
     private func setupAutoresizingMasks() {
-        [tableView, readyButton].forEach {
+        [daysStackView, readyButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
     }
     
     private func setupConstraints() {
-        setupTableViewConstraints()
-        setupReadyButtonConstraints()
-    }
-    
-    private func setupTableViewConstraints() {
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.Layout.tableViewTopInset),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(Week.allCases.count) * Constants.Layout.rowHeight)
-        ])
-    }
-    
-    private func setupReadyButtonConstraints() {
-        NSLayoutConstraint.activate([
+            daysStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.Layout.stackViewTopInset),
+            daysStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
+            daysStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
+            daysStackView.bottomAnchor.constraint(equalTo: readyButton.topAnchor, constant: -39),
+            
             readyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
             readyButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
             readyButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.Layout.buttonBottomInset)
         ])
     }
     
+    // MARK: - Days Setup
+    private func setupDays() {
+        let days = Week.allCases
+        
+        for (index, day) in days.enumerated() {
+            let dayLabel = createDayLabel(for: day)
+            let switchControl = createSwitch(for: day)
+            
+            let horizontalStack = UIStackView(arrangedSubviews: [dayLabel, switchControl])
+            horizontalStack.axis = .horizontal
+            horizontalStack.distribution = .equalSpacing
+            horizontalStack.alignment = .center
+            horizontalStack.isLayoutMarginsRelativeArrangement = true
+            horizontalStack.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            
+            let containerStack = UIStackView()
+            containerStack.axis = .vertical
+            containerStack.addArrangedSubview(horizontalStack)
+            
+            if index < days.count - 1 {
+                insertSeparatorLine(to: containerStack)
+            }
+            
+            daysStackView.addArrangedSubview(containerStack)
+        }
+    }
+    
+    private func createDayLabel(for day: Week) -> UILabel {
+        let label = UILabel()
+        label.text = day.title
+        label.font = Constants.Fonts.dayLabel
+        label.textColor = Constants.Colors.dayLabel
+        return label
+    }
+    
+    private func createSwitch(for day: Week) -> UISwitch {
+        let switchControl = UISwitch()
+        switchControl.onTintColor = Constants.Colors.switchTint
+        switchControl.isOn = currentSelectedDays.contains(day)
+        
+        switchControl.addAction(UIAction { [weak self] _ in
+            if switchControl.isOn {
+                self?.currentSelectedDays.insert(day)
+            } else {
+                self?.currentSelectedDays.remove(day)
+            }
+        }, for: .valueChanged)
+        
+        return switchControl
+    }
+    
+    private func insertSeparatorLine(to stackView: UIStackView) {
+        let separator = UIView()
+        separator.backgroundColor = Constants.Colors.separator
+        
+        let separatorContainer = UIView()
+        separatorContainer.addSubview(separator)
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            separator.leadingAnchor.constraint(equalTo: separatorContainer.leadingAnchor, constant: 16),
+            separator.trailingAnchor.constraint(equalTo: separatorContainer.trailingAnchor, constant: -16),
+            separator.topAnchor.constraint(equalTo: separatorContainer.topAnchor),
+            separator.bottomAnchor.constraint(equalTo: separatorContainer.bottomAnchor),
+            separator.heightAnchor.constraint(equalToConstant: Constants.Layout.separatorHeight)
+        ])
+        
+        stackView.addArrangedSubview(separatorContainer)
+    }
+    
     // MARK: - Actions
     private func didTapReadyButton() {
         onScheduleSelected(currentSelectedDays)
         navigationController?.popViewController(animated: true)
-    }
-}
-
-// MARK: - UITableViewDataSource
-extension ScheduleSelectionViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Week.allCases.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduleCell", for: indexPath) as! ScheduleCell
-        let day = Week.allCases[indexPath.row]
-        let isSelected = currentSelectedDays.contains(day)
-        cell.configure(with: day.title, isSelected: isSelected) { [weak self] isOn in
-            self?.toggleDaySelection(day, isSelected: isOn)
-        }
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Constants.Layout.rowHeight
-    }
-    
-    private func toggleDaySelection(_ day: Week, isSelected: Bool) {
-        if isSelected {
-            currentSelectedDays.insert(day)
-        } else {
-            currentSelectedDays.remove(day)
-        }
-    }
-}
-
-// MARK: - UITableViewDelegate
-extension ScheduleSelectionViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let cell = tableView.cellForRow(at: indexPath) as? ScheduleCell
-        cell?.toggleSwitch()
-    }
-}
-
-// MARK: - ScheduleCell
-private final class ScheduleCell: UITableViewCell {
-    
-    // MARK: - Constants
-    private enum CellConstants {
-        enum Fonts {
-            static let cellTitle: UIFont = .systemFont(ofSize: 16, weight: .regular)
-        }
-        
-        enum Colors {
-            static let switchTint: UIColor = .ypBlue
-        }
-    }
-    
-    // MARK: - UI Components
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = CellConstants.Fonts.cellTitle
-        return label
-    }()
-    
-    private lazy var switchControl: UISwitch = {
-        let switchControl = UISwitch()
-        switchControl.onTintColor = CellConstants.Colors.switchTint
-        switchControl.addAction(UIAction { [weak self] _ in
-            self?.switchValueChanged()
-        }, for: .valueChanged)
-        return switchControl
-    }()
-    
-    // MARK: - Properties
-    private var switchValueChangedHandler: ((Bool) -> Void)?
-    
-    // MARK: - Initializer
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: - Setup
-    private func setupUI() {
-        setupViews()
-        setupConstraints()
-        setupAutoresizingMasks()
-    }
-    
-    private func setupViews() {
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(switchControl)
-    }
-    
-    private func setupAutoresizingMasks() {
-        [titleLabel, switchControl].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-    }
-    
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            
-            switchControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            switchControl.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
-        ])
-    }
-    
-    // MARK: - Configuration
-    func configure(with title: String, isSelected: Bool, onSwitchValueChanged: @escaping (Bool) -> Void) {
-        titleLabel.text = title
-        switchControl.isOn = isSelected
-        self.switchValueChangedHandler = onSwitchValueChanged
-    }
-    
-    func toggleSwitch() {
-        switchControl.isOn.toggle()
-        switchValueChanged()
-    }
-    
-    private func switchValueChanged() {
-        switchValueChangedHandler?(switchControl.isOn)
     }
 }

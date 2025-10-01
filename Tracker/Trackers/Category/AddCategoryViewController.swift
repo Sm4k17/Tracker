@@ -78,6 +78,7 @@ final class AddCategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupTapGesture()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -121,7 +122,22 @@ final class AddCategoryViewController: UIViewController {
         ])
     }
     
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
     // MARK: - Actions
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: view)
+        
+        // Если тап не на текстовом поле и не на кнопке - скрываем клавиатуру
+        if !categoryTextField.frame.contains(location) && !readyButton.frame.contains(location) {
+            view.endEditing(true)
+        }
+    }
+    
     private func didTapReadyButton() {
         guard let categoryName = categoryTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !categoryName.isEmpty else {

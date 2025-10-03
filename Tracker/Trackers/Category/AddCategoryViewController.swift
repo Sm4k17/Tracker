@@ -31,6 +31,7 @@ final class AddCategoryViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftViewMode = .always
         textField.clearButtonMode = .whileEditing
+        textField.returnKeyType = .done
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
         
@@ -38,6 +39,9 @@ final class AddCategoryViewController: UIViewController {
         textField.addAction(UIAction { [weak self] _ in
             self?.updateReadyButtonState()
         }, for: .editingChanged)
+        
+        // Добавляем делегата для обработки return key
+        textField.delegate = self
         
         return textField
     }()
@@ -89,20 +93,15 @@ final class AddCategoryViewController: UIViewController {
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .ypWhite
-        title = Constants.navigationTitle
         setupNavigationBar()
         setupViews()
         setupConstraints()
     }
     
     private func setupNavigationBar() {
-        // Можно добавить кнопку отмены если нужно
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            title: "Отмена",
-            primaryAction: UIAction { [weak self] _ in
-                self?.navigationController?.popViewController(animated: true)
-            }
-        )
+        title = Constants.navigationTitle
+        navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {
@@ -123,28 +122,29 @@ final class AddCategoryViewController: UIViewController {
     }
     
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Actions
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: view)
-        
-        // Если тап не на текстовом поле и не на кнопке - скрываем клавиатуру
-        if !categoryTextField.frame.contains(location) && !readyButton.frame.contains(location) {
-            view.endEditing(true)
-        }
+    @objc private func handleTap() {
+        view.endEditing(true)
     }
     
     private func didTapReadyButton() {
+        createCategory()
+    }
+    
+    private func createCategory() {
         guard let categoryName = categoryTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !categoryName.isEmpty else {
             return
         }
         
+        // Вызываем колбэк и возвращаемся назад со стандартной анимацией
         onCategoryCreated(categoryName)
+        navigationController?.popViewController(animated: true)
     }
     
     private func updateReadyButtonState() {
@@ -153,5 +153,18 @@ final class AddCategoryViewController: UIViewController {
         
         readyButton.isEnabled = !isEmpty
         readyButton.backgroundColor = isEmpty ? .ypGray : .ypBlack
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension AddCategoryViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // При нажатии return создаем категорию если текст не пустой
+        if !(textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+            createCategory()
+        } else {
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }

@@ -109,10 +109,8 @@ final class CreationTrackerViewController: UIViewController {
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        
-        // Убираем кнопку назад
-        navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {

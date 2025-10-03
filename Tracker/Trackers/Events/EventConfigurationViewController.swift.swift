@@ -205,10 +205,8 @@ final class EventConfigurationViewController: UIViewController {
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        
-        // Убираем кнопку назад
-        navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {
@@ -373,7 +371,9 @@ final class EventConfigurationViewController: UIViewController {
         button.addSubview(textStack)
         
         // Добавляем стрелочку
-        let arrowImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+        let arrowImageView = UIImageView()
+        arrowImageView.image = UIImage(named: "chevron")
+
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         

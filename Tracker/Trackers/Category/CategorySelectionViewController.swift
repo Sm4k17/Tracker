@@ -7,6 +7,7 @@
 
 import UIKit
 
+// MARK: - Category Selection View Controller
 final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Constants
@@ -16,65 +17,26 @@ final class CategorySelectionViewController: UIViewController {
         static let placeholderTitle = "Привычки и события можно\nобъединить по смыслу"
         static let placeholderImageName = "icDizzy"
         
-        enum Layout {
-            static let horizontalInset: CGFloat = 16
-            static let rowHeight: CGFloat = 75
-            static let placeholderImageSize: CGFloat = 80
-            static let placeholderSpacing: CGFloat = 8
-            static let buttonBottomInset: CGFloat = 16
-            static let cornerRadius: CGFloat = 16
-            static let separatorHeight: CGFloat = 1
-            static let separatorInset: CGFloat = 16
-            static let stackViewTopInset: CGFloat = 24
-        }
-        
-        enum Fonts {
-            static let categoryLabel: UIFont = .systemFont(ofSize: 17, weight: .regular)
-            static let button: UIFont = .systemFont(ofSize: 16, weight: .medium)
-        }
-        
-        enum Colors {
-            static let categoryLabel: UIColor = .ypBlack
-            static let buttonText: UIColor = .ypWhite
-            static let stackViewBackground: UIColor = .ypBackgroundDay
-            static let separator: UIColor = .ypGray
-            static let checkmark: UIColor = .ypBlue
-        }
+        static let buttonHorizontalInset: CGFloat = 20
+        static let buttonBottomOffset: CGFloat = 16
+        static let tableTopInset: CGFloat = 24
+        static let tableBottomOffset: CGFloat = 24
+        static let horizontalPadding: CGFloat = 16
+        static let dizzyImageSize: CGFloat = 80
+        static let heightForRowAt: CGFloat = 75
+        static let tableCornerRadius: CGFloat = 16
+        static let labelNumberOfLines: Int = 2
+        static let stackSpacing: CGFloat = 8
     }
     
     // MARK: - UI Components
-    private lazy var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsVerticalScrollIndicator = true
-        return scrollView
-    }()
-    
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    private lazy var categoriesStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.distribution = .fill
-        stackView.backgroundColor = Constants.Colors.stackViewBackground
-        stackView.layer.cornerRadius = Constants.Layout.cornerRadius
-        stackView.layer.masksToBounds = true
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.isHidden = true // Сначала скрываем, пока нет данных
-        return stackView
-    }()
-    
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(Constants.addCategoryButtonTitle, for: .normal)
-        button.titleLabel?.font = Constants.Fonts.button
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .ypBlack
-        button.setTitleColor(Constants.Colors.buttonText, for: .normal)
-        button.layer.cornerRadius = Constants.Layout.cornerRadius
+        button.setTitleColor(.ypWhite, for: .normal)
+        button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(equalToConstant: 60).isActive = true
@@ -86,39 +48,63 @@ final class CategorySelectionViewController: UIViewController {
         return button
     }()
     
-    // Плейсхолдер для пустого состояния
-    private lazy var placeholderStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.alignment = .center
-        stack.spacing = Constants.Layout.placeholderSpacing
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .insetGrouped)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.showsVerticalScrollIndicator = false
+        tableView.isOpaque = true
+        tableView.clearsContextBeforeDrawing = true
+        tableView.clipsToBounds = true
+        tableView.layer.cornerRadius = Constants.tableCornerRadius
+        tableView.separatorColor = .ypGray
+        tableView.separatorStyle = .singleLine
+        tableView.separatorInset = UIEdgeInsets(
+            top: 0, left: Constants.horizontalPadding, bottom: 0, right: Constants.horizontalPadding)
+        tableView.isEditing = false
+        tableView.allowsSelection = true
+        tableView.backgroundColor = .clear
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "CategoryCell")
+        return tableView
     }()
     
     private lazy var placeholderImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(named: Constants.placeholderImageName)
+        let image = UIImage(named: Constants.placeholderImageName)
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.isHidden = false
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
     private lazy var placeholderLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textAlignment = .center
-        label.textColor = .ypBlack
         label.text = Constants.placeholderTitle
-        label.numberOfLines = 0
+        label.textColor = .ypBlack
+        label.numberOfLines = Constants.labelNumberOfLines
         label.textAlignment = .center
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    private lazy var placeholderStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [placeholderImageView, placeholderLabel])
+        stack.axis = .vertical
+        stack.spacing = Constants.stackSpacing
+        stack.alignment = .center
+        stack.isHidden = false
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
     }()
     
     // MARK: - Properties
     private let selectedCategory: String
     private let onCategorySelected: (String) -> Void
-    private var categories: [String] = [] // Начинаем с пустого массива
+    private var categories: [String] = []
     
     // MARK: - Initializer
     init(selectedCategory: String, onCategorySelected: @escaping (String) -> Void) {
@@ -135,194 +121,118 @@ final class CategorySelectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupNavigationBar()
         updateUIState()
     }
     
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .ypWhite
-        setupNavigationBar()
         setupViews()
         setupConstraints()
     }
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {
-        // Добавляем все основные элементы
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(categoriesStackView)
         view.addSubview(addCategoryButton)
+        view.addSubview(tableView)
         view.addSubview(placeholderStackView)
-        
-        // Настраиваем плейсхолдер
-        placeholderStackView.addArrangedSubview(placeholderImageView)
-        placeholderStackView.addArrangedSubview(placeholderLabel)
-        
-        // Устанавливаем размеры для изображения плейсхолдера
-        NSLayoutConstraint.activate([
-            placeholderImageView.widthAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
-            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize)
-        ])
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Скролл вью занимает все пространство над кнопкой
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: addCategoryButton.topAnchor, constant: -16),
+            addCategoryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                                                      constant: Constants.buttonHorizontalInset),
+            addCategoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                                                       constant: -Constants.buttonHorizontalInset),
+            addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                     constant: -Constants.buttonBottomOffset),
             
-            // Контент вью внутри скролла
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            // ИЗМЕНЕНИЕ: убираем top отступ, чтобы таблица начиналась сразу под navigation bar
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: addCategoryButton.topAnchor, constant: -Constants.tableBottomOffset),
             
-            // Стек категорий внутри контент вью
-            categoriesStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Constants.Layout.stackViewTopInset),
-            categoriesStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            categoriesStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            categoriesStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            placeholderImageView.widthAnchor.constraint(equalToConstant: Constants.dizzyImageSize),
+            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.dizzyImageSize),
             
-            // Кнопка всегда внизу
-            addCategoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            addCategoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.Layout.buttonBottomInset),
-            
-            // Плейсхолдер по центру экрана
             placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-    }
-    
-    // MARK: - Categories Setup
-    private func setupCategories() {
-        // Очищаем стек перед добавлением новых элементов
-        categoriesStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        for (index, category) in categories.enumerated() {
-            let categoryLabel = createCategoryLabel(for: category)
-            let checkmarkImageView = createCheckmarkImageView(for: category)
-            
-            let horizontalStack = UIStackView(arrangedSubviews: [categoryLabel, checkmarkImageView])
-            horizontalStack.axis = .horizontal
-            horizontalStack.distribution = .equalSpacing
-            horizontalStack.alignment = .center
-            horizontalStack.isLayoutMarginsRelativeArrangement = true
-            horizontalStack.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-            
-            let containerView = UIView()
-            containerView.addSubview(horizontalStack)
-            horizontalStack.translatesAutoresizingMaskIntoConstraints = false
-            
-            // Устанавливаем фиксированную высоту для контейнера
-            containerView.heightAnchor.constraint(equalToConstant: Constants.Layout.rowHeight).isActive = true
-            
-            NSLayoutConstraint.activate([
-                horizontalStack.topAnchor.constraint(equalTo: containerView.topAnchor),
-                horizontalStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-                horizontalStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-                horizontalStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
-            ])
-            
-            // Добавляем разделитель для всех элементов кроме последнего
-            if index < categories.count - 1 {
-                insertSeparatorLine(to: containerView)
-            }
-            
-            // Добавляем обработчик нажатия
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCategory(_:)))
-            containerView.addGestureRecognizer(tapGesture)
-            containerView.isUserInteractionEnabled = true
-            containerView.tag = index // Сохраняем индекс для идентификации
-            
-            categoriesStackView.addArrangedSubview(containerView)
-        }
-    }
-    
-    private func createCategoryLabel(for category: String) -> UILabel {
-        let label = UILabel()
-        label.text = category
-        label.font = Constants.Fonts.categoryLabel
-        label.textColor = Constants.Colors.categoryLabel
-        return label
-    }
-    
-    private func createCheckmarkImageView(for category: String) -> UIImageView {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = Constants.Colors.checkmark
-        
-        if category == selectedCategory {
-            imageView.image = UIImage(systemName: "checkmark")
-        } else {
-            imageView.image = nil
-        }
-        
-        // Устанавливаем размер для галочки
-        imageView.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        
-        return imageView
-    }
-    
-    private func insertSeparatorLine(to containerView: UIView) {
-        let separator = UIView()
-        separator.backgroundColor = Constants.Colors.separator
-        containerView.addSubview(separator)
-        separator.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            separator.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: Constants.Layout.separatorInset),
-            separator.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -Constants.Layout.separatorInset),
-            separator.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            separator.heightAnchor.constraint(equalToConstant: Constants.Layout.separatorHeight)
+            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            placeholderStackView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: Constants.horizontalPadding),
+            placeholderStackView.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -Constants.horizontalPadding),
         ])
     }
     
     // MARK: - UI State Management
     private func updateUIState() {
         let isEmpty = categories.isEmpty
-        
-        // Показываем либо стек категорий, либо плейсхолдер
-        categoriesStackView.isHidden = isEmpty
         placeholderStackView.isHidden = !isEmpty
-        scrollView.isHidden = isEmpty // Скрываем скролл когда нет категорий
-        
-        if !isEmpty {
-            setupCategories()
-        }
-        
-        // Анимируем изменения
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
+        tableView.isHidden = isEmpty
     }
     
     // MARK: - Actions
-    @objc private func didTapCategory(_ gesture: UITapGestureRecognizer) {
-        guard let containerView = gesture.view else { return }
-        let index = containerView.tag
-        let selectedCategory = categories[index]
-        onCategorySelected(selectedCategory)
-        navigationController?.popViewController(animated: true)
-    }
-    
     private func didTapAddCategoryButton() {
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
             self?.categories.append(newCategory)
-            self?.updateUIState() // Обновляем состояние UI
-            self?.onCategorySelected(newCategory)
-            self?.navigationController?.popViewController(animated: true)
+            self?.updateUIState()
+            self?.tableView.reloadData()
         }
         navigationController?.pushViewController(addCategoryVC, animated: true)
+    }
+}
+
+// MARK: - UITableViewDataSource
+extension CategorySelectionViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return categories.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let category = categories[indexPath.row]
+        
+        // Конфигурация ячейки
+        cell.textLabel?.text = category
+        cell.textLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        cell.textLabel?.textColor = .ypBlack
+        cell.backgroundColor = .ypBackgroundDay
+        cell.selectionStyle = .none
+        
+        // Галочка для выбранной категории
+        if category == selectedCategory {
+            cell.accessoryType = .checkmark
+            cell.tintColor = .ypBlue
+        } else {
+            cell.accessoryType = .none
+        }
+        
+        return cell
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension CategorySelectionViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return Constants.heightForRowAt
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return Constants.tableTopInset // 24
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return UIView()
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedCategory = categories[indexPath.row]
+        onCategorySelected(selectedCategory)
+        navigationController?.popViewController(animated: true)
     }
 }

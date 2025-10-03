@@ -17,12 +17,12 @@ final class ScheduleSelectionViewController: UIViewController {
         
         enum Layout {
             static let horizontalInset: CGFloat = 16
-            static let buttonHeight: CGFloat = 75
+            static let buttonHeight: CGFloat = 60
             static let cornerRadius: CGFloat = 16
             static let stackViewTopInset: CGFloat = 24
             static let buttonBottomInset: CGFloat = 16
             static let rowHeight: CGFloat = 75
-            static let separatorHeight: CGFloat = 1
+            static let separatorHeight: CGFloat = 0.5
         }
         
         enum Fonts {
@@ -102,8 +102,8 @@ final class ScheduleSelectionViewController: UIViewController {
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {

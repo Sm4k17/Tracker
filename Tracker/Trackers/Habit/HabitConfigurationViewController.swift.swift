@@ -31,7 +31,7 @@ final class HabitConfigurationViewController: UIViewController {
             static let buttonHeight: CGFloat = 60
             static let cornerRadius: CGFloat = 16
             static let textFieldHeight: CGFloat = 75
-            static let separatorHeight: CGFloat = 1
+            static let separatorHeight: CGFloat = 0.5
             static let dropdownItemHeight: CGFloat = 75
             static let separatorInset: CGFloat = 16
             
@@ -237,10 +237,8 @@ final class HabitConfigurationViewController: UIViewController {
     
     private func setupNavigationBar() {
         title = Constants.navigationTitle
-        
-        // Убираем кнопку назад
-        navigationItem.leftBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {
@@ -403,7 +401,9 @@ final class HabitConfigurationViewController: UIViewController {
         button.addSubview(textStack)
         
         // Добавляем стрелочку
-        let arrowImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+        let arrowImageView = UIImageView()
+        arrowImageView.image = UIImage(named: "chevron")
+        
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         

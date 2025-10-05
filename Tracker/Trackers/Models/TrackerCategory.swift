@@ -6,6 +6,17 @@
 //
 
 struct TrackerCategory {
-    let header: String
+    let title: String
     let trackers: [Tracker]
+    
+    // Для обратной совместимости
+    var header: String { title }
+}
+
+// Для удобства создания
+extension TrackerCategory {
+    init(header: String, trackers: [Tracker]) {
+        self.title = header
+        self.trackers = trackers
+    }
 }

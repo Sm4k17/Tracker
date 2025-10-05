@@ -40,9 +40,6 @@ final class AddCategoryViewController: UIViewController {
             self?.updateReadyButtonState()
         }, for: .editingChanged)
         
-        // Добавляем делегата для обработки return key
-        textField.delegate = self
-        
         return textField
     }()
     
@@ -153,18 +150,5 @@ final class AddCategoryViewController: UIViewController {
         
         readyButton.isEnabled = !isEmpty
         readyButton.backgroundColor = isEmpty ? .ypGray : .ypBlack
-    }
-}
-
-// MARK: - UITextFieldDelegate
-extension AddCategoryViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        // При нажатии return создаем категорию если текст не пустой
-        if !(textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
-            createCategory()
-        } else {
-            textField.resignFirstResponder()
-        }
-        return true
     }
 }

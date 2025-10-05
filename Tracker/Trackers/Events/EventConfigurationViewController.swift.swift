@@ -21,7 +21,6 @@ final class EventConfigurationViewController: UIViewController {
         static let categorySubtitle = ""
         static let emojiTitle = "Emoji"
         static let colorTitle = "Цвет"
-        static let maxCharacterCount = 38
         
         // Константы для размеров и отступов
         enum Layout {
@@ -89,9 +88,6 @@ final class EventConfigurationViewController: UIViewController {
         textField.leftViewMode = .always
         textField.clearButtonMode = .whileEditing
         textField.heightAnchor.constraint(equalToConstant: Constants.Layout.textFieldHeight).isActive = true
-        
-        // Добавляем делегата для ограничения символов
-        textField.delegate = self
         
         textField.addAction(UIAction { [weak self] _ in
             self?.updateCreateButtonState()
@@ -241,7 +237,7 @@ final class EventConfigurationViewController: UIViewController {
     }
     
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
@@ -322,15 +318,8 @@ final class EventConfigurationViewController: UIViewController {
     }
     
     // MARK: - Actions
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: view)
-        
-        // Если тап не на текстовом поле и не на кнопках - скрываем клавиатуру
-        if !nameTextField.frame.contains(location) &&
-           !categoryContainer.frame.contains(location) &&
-           !buttonsStackView.frame.contains(location) {
-            view.endEditing(true)
-        }
+    @objc private func handleTap() {
+        view.endEditing(true)
     }
     
     // MARK: - Factory Methods
@@ -460,11 +449,6 @@ final class EventConfigurationViewController: UIViewController {
             return
         }
         
-        guard trackerName.count <= Constants.maxCharacterCount else {
-            showError(message: "Название не должно превышать \(Constants.maxCharacterCount) символов")
-            return
-        }
-        
         guard !selectedEmoji.isEmpty else {
             showError(message: "Выберите emoji")
             return
@@ -480,10 +464,11 @@ final class EventConfigurationViewController: UIViewController {
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: [] // Пустое расписание для событий
+            schedule: [], // Пустое расписание для событий
+            category: selectedCategory
         )
         
-        delegate?.didCreateNewTracker(event)
+        delegate?.didCreateNewTracker(event, categoryTitle: selectedCategory)
     }
     
     private func showError(message: String) {
@@ -495,27 +480,11 @@ final class EventConfigurationViewController: UIViewController {
     private func updateCreateButtonState() {
         let text = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let isEnabled = !text.isEmpty &&
-        text.count <= Constants.maxCharacterCount &&
         !selectedCategory.isEmpty &&
         !selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
-    }
-}
-
-// MARK: - UITextFieldDelegate
-extension EventConfigurationViewController: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // Получаем текущий текст
-        let currentText = textField.text ?? ""
-        
-        // Вычисляем новый текст после изменения
-        guard let stringRange = Range(range, in: currentText) else { return false }
-        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        
-        // Проверяем, не превышает ли новый текст лимит
-        return updatedText.count <= Constants.maxCharacterCount
     }
 }
 

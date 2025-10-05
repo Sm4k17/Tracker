@@ -24,6 +24,8 @@
 		F1358F2C2E8C361D0095CC3E /* AddCategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F2B2E8C361D0095CC3E /* AddCategoryViewController.swift */; };
 		F1358F2E2E8C590D0095CC3E /* EmojiSelectionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F2D2E8C590D0095CC3E /* EmojiSelectionDelegate.swift */; };
 		F1358F302E8C597E0095CC3E /* ColorSelectionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F2F2E8C597E0095CC3E /* ColorSelectionDelegate.swift */; };
+		F1358F322E9030F00095CC3E /* TrackerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F312E9030F00095CC3E /* TrackerCollectionViewCell.swift */; };
+		F1358F342E9031730095CC3E /* SupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F332E9031730095CC3E /* SupplementaryView.swift */; };
 		F1ED868B2E7854070082B276 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86832E7854070082B276 /* AppDelegate.swift */; };
 		F1ED868C2E7854070082B276 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86882E7854070082B276 /* SceneDelegate.swift */; };
 		F1ED868D2E7854070082B276 /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86892E7854070082B276 /* TrackersViewController.swift */; };
@@ -51,6 +53,8 @@
 		F1358F2B2E8C361D0095CC3E /* AddCategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCategoryViewController.swift; sourceTree = "<group>"; };
 		F1358F2D2E8C590D0095CC3E /* EmojiSelectionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSelectionDelegate.swift; sourceTree = "<group>"; };
 		F1358F2F2E8C597E0095CC3E /* ColorSelectionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSelectionDelegate.swift; sourceTree = "<group>"; };
+		F1358F312E9030F00095CC3E /* TrackerCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCollectionViewCell.swift; sourceTree = "<group>"; };
+		F1358F332E9031730095CC3E /* SupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementaryView.swift; sourceTree = "<group>"; };
 		F1ED86522E6EF3840082B276 /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1ED86832E7854070082B276 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F1ED86842E7854070082B276 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -205,6 +209,8 @@
 		F1ED86B02E78AC220082B276 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				F1358F312E9030F00095CC3E /* TrackerCollectionViewCell.swift */,
+				F1358F332E9031730095CC3E /* SupplementaryView.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -285,8 +291,10 @@
 				F1358F102E8C23A70095CC3E /* TrackerCategory.swift in Sources */,
 				F1358F272E8C35420095CC3E /* CategorySelectionViewController.swift in Sources */,
 				F1358F1B2E8C2D450095CC3E /* HabitConfigurationViewController.swift.swift in Sources */,
+				F1358F322E9030F00095CC3E /* TrackerCollectionViewCell.swift in Sources */,
 				F1ED868B2E7854070082B276 /* AppDelegate.swift in Sources */,
 				F1ED86A42E786D130082B276 /* TabBarController.swift in Sources */,
+				F1358F342E9031730095CC3E /* SupplementaryView.swift in Sources */,
 				F1ED868C2E7854070082B276 /* SceneDelegate.swift in Sources */,
 				F1358F212E8C34E00095CC3E /* ColorSelectionViewController.swift in Sources */,
 				F1ED86AE2E786E610082B276 /* StatisticViewController.swift in Sources */,

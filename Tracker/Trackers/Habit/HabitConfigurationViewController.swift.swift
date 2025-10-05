@@ -280,21 +280,14 @@ final class HabitConfigurationViewController: UIViewController {
     }
     
     private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Actions
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: view)
-        
-        // Если тап не на текстовом поле и не на кнопках - скрываем клавиатуру
-        if !nameTextField.frame.contains(location) &&
-           !categoryScheduleStack.frame.contains(location) &&
-           !buttonsStackView.frame.contains(location) {
-            view.endEditing(true)
-        }
+    @objc private func handleTap() {
+        view.endEditing(true)
     }
     
     // MARK: - Constraint Setup Methods
@@ -540,10 +533,11 @@ final class HabitConfigurationViewController: UIViewController {
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: selectedSchedule
+            schedule: selectedSchedule,
+            category: selectedCategory
         )
         
-        delegate?.didCreateNewTracker(habit)
+        delegate?.didCreateNewTracker(habit, categoryTitle: selectedCategory)
     }
     
     private func showError(message: String) {

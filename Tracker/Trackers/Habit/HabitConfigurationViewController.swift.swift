@@ -23,6 +23,8 @@ final class HabitConfigurationViewController: UIViewController {
         static let scheduleSubtitle = ""
         static let emojiTitle = "Emoji"
         static let colorTitle = "Цвет"
+        static let symbolsLimitMessage = "Ограничение 38 символов"
+        static let symbolsLimit = 38
         
         // Константы для размеров и отступов
         enum Layout {
@@ -34,6 +36,7 @@ final class HabitConfigurationViewController: UIViewController {
             static let separatorHeight: CGFloat = 0.5
             static let dropdownItemHeight: CGFloat = 75
             static let separatorInset: CGFloat = 16
+            static let symbolsLimitLabelHeight: CGFloat = 22
             
             // Используем унифицированные высоты коллекций
             static var emojiCollectionHeight: CGFloat {
@@ -203,12 +206,25 @@ final class HabitConfigurationViewController: UIViewController {
         createSectionLabel(text: Constants.colorTitle)
     }()
     
+    private lazy var symbolsLimitLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = .ypRed
+        label.text = Constants.symbolsLimitMessage
+        label.textAlignment = .center
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
     private var selectedSchedule: Set<Week> = []
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .systemRed
+    private var showWarningAnimationStarted = false
+    private var hideWarningAnimationStarted = false
     
     // MARK: - Initializer
     init(delegate: TrackerViewControllerDelegate?) {
@@ -245,7 +261,7 @@ final class HabitConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [nameTextField, categoryScheduleStack, emojiLabel, emojiSelectionView,
+        [nameTextField, symbolsLimitLabel, categoryScheduleStack, emojiLabel, emojiSelectionView,
          colorLabel, colorSelectionView].forEach {
             contentView.addSubview($0)
         }
@@ -312,11 +328,18 @@ final class HabitConfigurationViewController: UIViewController {
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset)
         ])
+        
+        NSLayoutConstraint.activate([
+            symbolsLimitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+            symbolsLimitLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
+            symbolsLimitLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
+            symbolsLimitLabel.heightAnchor.constraint(equalToConstant: Constants.Layout.symbolsLimitLabelHeight)
+        ])
     }
     
     private func setupCategoryScheduleStackConstraints() {
         NSLayoutConstraint.activate([
-            categoryScheduleStack.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Constants.Layout.verticalSpacing),
+            categoryScheduleStack.topAnchor.constraint(equalTo: symbolsLimitLabel.bottomAnchor, constant: Constants.Layout.verticalSpacing),
             categoryScheduleStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
             categoryScheduleStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset)
         ])
@@ -466,6 +489,46 @@ final class HabitConfigurationViewController: UIViewController {
         }
     }
     
+    // MARK: - Symbols Limit Methods
+    private func checkSymbolsLimit() {
+        let symbolsCount = nameTextField.text?.count ?? 0
+        symbolsCount > Constants.symbolsLimit ? showSymbolsLimitLabel() : hideSymbolsLimitLabel()
+    }
+    
+    private func showSymbolsLimitLabel() {
+        guard !showWarningAnimationStarted && symbolsLimitLabel.isHidden && !hideWarningAnimationStarted else { return }
+        showWarningAnimationStarted = true
+        symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+        symbolsLimitLabel.alpha = 0
+        symbolsLimitLabel.isHidden = false
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            guard let self else { return }
+            self.symbolsLimitLabel.transform = .identity
+            self.symbolsLimitLabel.alpha = 1
+            self.view.layoutIfNeeded()
+        }, completion: { [weak self] _ in
+            guard let self else { return }
+            self.showWarningAnimationStarted = false
+        })
+    }
+    
+    private func hideSymbolsLimitLabel() {
+        guard !hideWarningAnimationStarted && !symbolsLimitLabel.isHidden && !showWarningAnimationStarted else { return }
+        hideWarningAnimationStarted = true
+        UIView.animate(withDuration: 0.5, animations: { [weak self] in
+            guard let self else { return }
+            self.symbolsLimitLabel.alpha = 0
+            self.symbolsLimitLabel.isHidden = true
+            self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+            self.view.layoutIfNeeded()
+        }) { [weak self] _ in
+            guard let self else { return }
+            self.symbolsLimitLabel.isHidden = true
+            self.symbolsLimitLabel.transform = .identity
+            self.hideWarningAnimationStarted = false
+        }
+    }
+    
     // MARK: - Actions
     private func didTapCategoryButton() {
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
@@ -513,6 +576,12 @@ final class HabitConfigurationViewController: UIViewController {
             return
         }
         
+        let symbolsCount = trackerName.count
+        guard symbolsCount <= Constants.symbolsLimit else {
+            showError(message: "Название не должно превышать \(Constants.symbolsLimit) символов")
+            return
+        }
+        
         guard !selectedSchedule.isEmpty else {
             showError(message: "Выберите расписание")
             return
@@ -529,11 +598,11 @@ final class HabitConfigurationViewController: UIViewController {
         }
         
         let habit = Tracker(
-            id: UUID(),
+            idTrackers: UUID(),
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: selectedSchedule,
+            scheduleTrackers: selectedSchedule,
             category: selectedCategory
         )
         
@@ -547,14 +616,24 @@ final class HabitConfigurationViewController: UIViewController {
     }
     
     private func updateCreateButtonState() {
+        checkSymbolsLimit()
+        
         let text = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let isEnabled = !text.isEmpty &&
+        let symbolsCount = text.count
+        let nameIsValid = (1...Constants.symbolsLimit).contains(symbolsCount)
+        
+        let isEnabled = nameIsValid &&
         !selectedCategory.isEmpty &&
         !selectedSchedule.isEmpty &&
         !selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
+        
+        // Повторная проверка через секунду на случай наложения анимаций
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+            self?.checkSymbolsLimit()
+        }
     }
 }
 

@@ -5,6 +5,8 @@
 //  Created by Рустам Ханахмедов on 30.09.2025.
 //
 
+/// Перечисление дней недели
+/// Используется для задания расписания показа трекеров
 enum Week: Int, CaseIterable {
     case monday = 1
     case tuesday = 2
@@ -39,12 +41,9 @@ enum Week: Int, CaseIterable {
     }
 }
 
-// MARK: - Init
-extension Week {
-    init?(title: String) {
-        guard let week = Week.allCases.first(where: { $0.title == title }) else {
-            return nil
-        }
-        self = week
-    }
-}
+/*
+ Week - модель расписания
+
+ Назначение: Определение дней показа трекера
+ Использование: Фильтрация по дате, настройка расписания
+ */

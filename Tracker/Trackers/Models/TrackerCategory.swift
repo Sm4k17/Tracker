@@ -5,18 +5,16 @@
 //  Created by Рустам Ханахмедов on 30.09.2025.
 //
 
+/// Модель категории трекеров
+/// Группирует трекеры по тематическим разделам
 struct TrackerCategory {
     let title: String
     let trackers: [Tracker]
-    
-    // Для обратной совместимости
-    var header: String { title }
 }
 
-// Для удобства создания
-extension TrackerCategory {
-    init(header: String, trackers: [Tracker]) {
-        self.title = header
-        self.trackers = trackers
-    }
-}
+/*
+ TrackerCategory - организационная модель
+
+Назначение: Группировка трекеров по темам
+Использование: Разделение на секции в коллекции
+*/

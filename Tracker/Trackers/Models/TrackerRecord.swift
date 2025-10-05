@@ -7,6 +7,8 @@
 
 import Foundation
 
+/// Модель записи о выполнении трекера
+/// Фиксирует факт выполнения трекера в определенную дату
 struct TrackerRecord {
     let id: UUID
     let trackerId: UUID
@@ -19,14 +21,9 @@ struct TrackerRecord {
     }
 }
 
-// MARK: - Hashable
-extension TrackerRecord: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(date)
-    }
-        
-    static func == (lhs: TrackerRecord, rhs: TrackerRecord) -> Bool {
-        lhs.id == rhs.id && Calendar.current.isDate(lhs.date, inSameDayAs: rhs.date)
-    }
-}
+/*
+ TrackerRecord - модель статистики
+
+Назначение: Фиксация фактов выполнения
+Использование: Подсчет дней, проверка выполнения на дату
+*/

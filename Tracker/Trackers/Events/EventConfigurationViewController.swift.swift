@@ -21,6 +21,8 @@ final class EventConfigurationViewController: UIViewController {
         static let categorySubtitle = ""
         static let emojiTitle = "Emoji"
         static let colorTitle = "Цвет"
+        static let symbolsLimitMessage = "Ограничение 38 символов"
+        static let symbolsLimit = 38
         
         // Константы для размеров и отступов
         enum Layout {
@@ -31,6 +33,7 @@ final class EventConfigurationViewController: UIViewController {
             static let textFieldHeight: CGFloat = 75
             static let dropdownItemHeight: CGFloat = 75
             static let separatorInset: CGFloat = 16
+            static let symbolsLimitLabelHeight: CGFloat = 22
             
             // Используем унифицированные высоты коллекций
             static var emojiCollectionHeight: CGFloat {
@@ -168,11 +171,24 @@ final class EventConfigurationViewController: UIViewController {
         createSectionLabel(text: Constants.colorTitle)
     }()
     
+    private lazy var symbolsLimitLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = .ypRed
+        label.text = Constants.symbolsLimitMessage
+        label.textAlignment = .center
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .systemRed
+    private var showWarningAnimationStarted = false
+    private var hideWarningAnimationStarted = false
     
     // MARK: - Initializer
     init(delegate: TrackerViewControllerDelegate?) {
@@ -209,7 +225,7 @@ final class EventConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [nameTextField, categoryContainer, emojiLabel, emojiSelectionView,
+        [nameTextField, symbolsLimitLabel, categoryContainer, emojiLabel, emojiSelectionView,
          colorLabel, colorSelectionView].forEach {
             contentView.addSubview($0)
         }
@@ -264,11 +280,17 @@ final class EventConfigurationViewController: UIViewController {
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset)
         ])
+        NSLayoutConstraint.activate([
+            symbolsLimitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+            symbolsLimitLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
+            symbolsLimitLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
+            symbolsLimitLabel.heightAnchor.constraint(equalToConstant: Constants.Layout.symbolsLimitLabelHeight)
+        ])
     }
     
     private func setupCategoryContainerConstraints() {
         NSLayoutConstraint.activate([
-            categoryContainer.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: Constants.Layout.verticalSpacing),
+            categoryContainer.topAnchor.constraint(equalTo: symbolsLimitLabel.bottomAnchor, constant: Constants.Layout.verticalSpacing),
             categoryContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
             categoryContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
             categoryContainer.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight)
@@ -317,6 +339,46 @@ final class EventConfigurationViewController: UIViewController {
         ])
     }
     
+    // MARK: - Symbols Limit Methods
+    private func checkSymbolsLimit() {
+        let symbolsCount = nameTextField.text?.count ?? 0
+        symbolsCount > Constants.symbolsLimit ? showSymbolsLimitLabel() : hideSymbolsLimitLabel()
+    }
+    
+    private func showSymbolsLimitLabel() {
+        guard !showWarningAnimationStarted && symbolsLimitLabel.isHidden && !hideWarningAnimationStarted else { return }
+        showWarningAnimationStarted = true
+        symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+        symbolsLimitLabel.alpha = 0
+        symbolsLimitLabel.isHidden = false
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            guard let self else { return }
+            self.symbolsLimitLabel.transform = .identity
+            self.symbolsLimitLabel.alpha = 1
+            self.view.layoutIfNeeded()
+        }, completion: { [weak self] _ in
+            guard let self else { return }
+            self.showWarningAnimationStarted = false
+        })
+    }
+    
+    private func hideSymbolsLimitLabel() {
+        guard !hideWarningAnimationStarted && !symbolsLimitLabel.isHidden && !showWarningAnimationStarted else { return }
+        hideWarningAnimationStarted = true
+        UIView.animate(withDuration: 0.5, animations: { [weak self] in
+            guard let self else { return }
+            self.symbolsLimitLabel.alpha = 0
+            self.symbolsLimitLabel.isHidden = true
+            self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+            self.view.layoutIfNeeded()
+        }) { [weak self] _ in
+            guard let self else { return }
+            self.symbolsLimitLabel.isHidden = true
+            self.symbolsLimitLabel.transform = .identity
+            self.hideWarningAnimationStarted = false
+        }
+    }
+    
     // MARK: - Actions
     @objc private func handleTap() {
         view.endEditing(true)
@@ -362,7 +424,7 @@ final class EventConfigurationViewController: UIViewController {
         // Добавляем стрелочку
         let arrowImageView = UIImageView()
         arrowImageView.image = UIImage(named: "chevron")
-
+        
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         
@@ -449,6 +511,12 @@ final class EventConfigurationViewController: UIViewController {
             return
         }
         
+        let symbolsCount = trackerName.count
+        guard symbolsCount <= Constants.symbolsLimit else {
+            showError(message: "Название не должно превышать \(Constants.symbolsLimit) символов")
+            return
+        }
+        
         guard !selectedEmoji.isEmpty else {
             showError(message: "Выберите emoji")
             return
@@ -460,11 +528,11 @@ final class EventConfigurationViewController: UIViewController {
         }
         
         let event = Tracker(
-            id: UUID(),
+            idTrackers: UUID(),
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: [], // Пустое расписание для событий
+            scheduleTrackers: [], // Пустое расписание для событий
             category: selectedCategory
         )
         
@@ -478,13 +546,23 @@ final class EventConfigurationViewController: UIViewController {
     }
     
     private func updateCreateButtonState() {
+        checkSymbolsLimit()
         let text = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let symbolsCount = text.count
+        let nameIsValid = (1...Constants.symbolsLimit).contains(symbolsCount)
+        
         let isEnabled = !text.isEmpty &&
+        nameIsValid &&
         !selectedCategory.isEmpty &&
         !selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
+        
+        // Повторная проверка через секунду на случай наложения анимаций
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+            self?.checkSymbolsLimit()
+        }
     }
 }
 

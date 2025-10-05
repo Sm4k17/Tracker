@@ -348,7 +348,7 @@ final class TrackersViewController: UIViewController {
             color: .systemBlue,
             emoji: "💧",
             schedule: [.tuesday, .thursday] // Вт, Чт
-                //Set(Week.allCases) // Ежедневно
+            //Set(Week.allCases) // Ежедневно
         )
         
         let sampleTracker2 = Tracker(

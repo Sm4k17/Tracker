@@ -7,6 +7,8 @@
 
 import UIKit
 
+/// Модель трекера - основная сущность приложения
+/// Представляет собой привычку или нерегулярное событие для отслеживания
 struct Tracker {
     let idTrackers: UUID
     let name: String
@@ -14,20 +16,24 @@ struct Tracker {
     let emoji: String
     let scheduleTrackers: Set<Week>
     let category: String
-    
-    // Для обратной совместимости
-    var id: UUID { idTrackers }
-    var schedule: Set<Week> { scheduleTrackers }
 }
 
 // Для удобства создания
-extension Tracker {
-    init(id: UUID = UUID(), name: String, color: UIColor, emoji: String, schedule: Set<Week>, category: String = "") {
-        self.idTrackers = id
-        self.name = name
-        self.color = color
-        self.emoji = emoji
-        self.scheduleTrackers = schedule
-        self.category = category
+    extension Tracker {
+        init(name: String, color: UIColor, emoji: String, schedule: Set<Week>, category: String = "") {
+            self.idTrackers = UUID()
+            self.name = name
+            self.color = color
+            self.emoji = emoji
+            self.scheduleTrackers = schedule
+            self.category = category
+        }
     }
-}
+
+/*
+ Tracker - основная бизнес-модель
+
+ Назначение: Хранит все данные о трекере
+ Использование: Создание, отображение, фильтрация трекеров
+ Ключевые поля: расписание, цвет, emoji, категория
+*/

@@ -524,20 +524,22 @@ extension TrackersViewController: TrackerCellDelegate {
             return
         }
         
-        // Переключаем состояние выполнения
-        if let index = completedTrackers.firstIndex(where: { record in
-            record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
-        }) {
-            completedTrackers.remove(at: index)
-            print("❌ Удалили запись выполнения")
-        } else {
-            let record = TrackerRecord(trackerId: trackerId, date: currentDate)
-            completedTrackers.append(record)
-            print("✅ Добавили запись выполнения")
+        // Переключаем состояние выполнения с анимацией
+        collectionView.performBatchUpdates {
+            if let index = completedTrackers.firstIndex(where: { record in
+                record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+            }) {
+                completedTrackers.remove(at: index)
+                print("❌ Удалили запись выполнения")
+            } else {
+                let record = TrackerRecord(trackerId: trackerId, date: currentDate)
+                completedTrackers.append(record)
+                print("✅ Добавили запись выполнения")
+            }
+            
+            // Обновляем только нужную ячейку с анимацией
+            collectionView.reloadItems(at: [indexPath])
         }
-        
-        // Обновляем только нужную ячейку
-        collectionView.reloadItems(at: [indexPath])
     }
 }
 
@@ -548,16 +550,33 @@ extension TrackersViewController: TrackerViewControllerDelegate {
         
         let finalCategoryTitle = categoryTitle.isEmpty ? "Мои трекеры" : categoryTitle
         
-        if let index = categories.firstIndex(where: { $0.title == finalCategoryTitle }) {
-            // ОБНОВЛЯЕМ СУЩЕСТВУЮЩУЮ КАТЕГОРИЮ
-            let category = categories[index]
+        // Находим индекс категории, если она существует
+        if let categoryIndex = categories.firstIndex(where: { $0.title == finalCategoryTitle }) {
+            // Обновляем существующую категорию с анимацией
+            let category = categories[categoryIndex]
             var updatedTrackers = category.trackers
             updatedTrackers.append(tracker)
-            categories[index] = TrackerCategory(title: category.title, trackers: updatedTrackers)
+            
+            // Находим индекс в filteredCategories
+            if let filteredCategoryIndex = filteredCategories.firstIndex(where: { $0.title == finalCategoryTitle }) {
+                let newIndexPath = IndexPath(item: updatedTrackers.count - 1, section: filteredCategoryIndex)
+                
+                collectionView.performBatchUpdates {
+                    categories[categoryIndex] = TrackerCategory(title: category.title, trackers: updatedTrackers)
+                    filteredCategories[filteredCategoryIndex] = TrackerCategory(title: category.title, trackers: updatedTrackers)
+                    collectionView.insertItems(at: [newIndexPath])
+                }
+            }
         } else {
-            // СОЗДАЕМ НОВУЮ КАТЕГОРИЮ - didSet ВЫЗОВЕТ filterTrackersForCurrentDate()
+            // Создаем новую категорию с анимацией
             let newCategory = TrackerCategory(title: finalCategoryTitle, trackers: [tracker])
-            categories.append(newCategory)
+            
+            collectionView.performBatchUpdates {
+                categories.append(newCategory)
+                // filteredCategories автоматически обновится благодаря didSet
+                let newSectionIndex = filteredCategories.count - 1
+                collectionView.insertSections(IndexSet(integer: newSectionIndex))
+            }
         }
     }
     

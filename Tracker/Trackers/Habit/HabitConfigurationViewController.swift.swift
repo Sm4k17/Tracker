@@ -221,7 +221,7 @@ final class HabitConfigurationViewController: UIViewController {
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
     private var selectedSchedule: Set<Week> = []
-    private var selectedEmoji: String = ""
+    private var selectedEmoji: String = "🙂" //Временная заглушка
     private var selectedColor: UIColor = .systemRed
     private var showWarningAnimationStarted = false
     private var hideWarningAnimationStarted = false
@@ -242,6 +242,9 @@ final class HabitConfigurationViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         setupTapGesture()
+        selectedCategory = "Важное"
+        updateCategoryButtonSubtitle(selectedCategory)
+        updateCreateButtonState()
     }
     
     // MARK: - Setup
@@ -261,8 +264,8 @@ final class HabitConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [nameTextField, symbolsLimitLabel, categoryScheduleStack, emojiLabel, emojiSelectionView,
-         colorLabel, colorSelectionView].forEach {
+        [nameTextField, symbolsLimitLabel, categoryScheduleStack /*emojiLabel, emojiSelectionView,
+         colorLabel, colorSelectionView*/].forEach {
             contentView.addSubview($0)
         }
         
@@ -290,9 +293,13 @@ final class HabitConfigurationViewController: UIViewController {
         setupScrollViewConstraints()
         setupNameTextFieldConstraints()
         setupCategoryScheduleStackConstraints()
-        setupEmojiSectionConstraints()
-        setupColorSectionConstraints()
+        //setupEmojiSectionConstraints()
+        //setupColorSectionConstraints()
         setupButtonsConstraints()
+        
+        NSLayoutConstraint.activate([
+                contentView.bottomAnchor.constraint(equalTo: categoryScheduleStack.bottomAnchor, constant: 24)
+            ])
     }
     
     private func setupTapGesture() {
@@ -531,12 +538,15 @@ final class HabitConfigurationViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapCategoryButton() {
+        // ВРЕМЕННО
+        /*
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
             self?.selectedCategory = category
             self?.updateCategoryButtonSubtitle(category)
             self?.updateCreateButtonState()
         }
         navigationController?.pushViewController(categoryVC, animated: true)
+         */
     }
     
     private func didTapScheduleButton() {
@@ -586,12 +596,12 @@ final class HabitConfigurationViewController: UIViewController {
             showError(message: "Выберите расписание")
             return
         }
-        
+        /*
         guard !selectedEmoji.isEmpty else {
             showError(message: "Выберите emoji")
             return
         }
-        
+        */
         guard !selectedCategory.isEmpty else {
             showError(message: "Выберите категорию")
             return
@@ -624,8 +634,8 @@ final class HabitConfigurationViewController: UIViewController {
         
         let isEnabled = nameIsValid &&
         !selectedCategory.isEmpty &&
-        !selectedSchedule.isEmpty &&
-        !selectedEmoji.isEmpty
+        !selectedSchedule.isEmpty //&&
+        //!selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray

@@ -123,6 +123,8 @@ final class CategorySelectionViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         updateUIState()
+        // ВРЕМЕННО: добавляем тестовые категории
+        categories = ["Важное", "Работа", "Личное"]
     }
     
     // MARK: - Setup

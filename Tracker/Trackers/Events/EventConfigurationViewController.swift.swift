@@ -185,7 +185,7 @@ final class EventConfigurationViewController: UIViewController {
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
-    private var selectedEmoji: String = ""
+    private var selectedEmoji: String = "🙂" //Временно
     private var selectedColor: UIColor = .systemRed
     private var showWarningAnimationStarted = false
     private var hideWarningAnimationStarted = false
@@ -206,6 +206,9 @@ final class EventConfigurationViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         setupTapGesture()
+        selectedCategory = "Важное"
+        updateCategoryButtonSubtitle(selectedCategory)
+        updateCreateButtonState()
     }
     
     // MARK: - Setup
@@ -225,8 +228,8 @@ final class EventConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [nameTextField, symbolsLimitLabel, categoryContainer, emojiLabel, emojiSelectionView,
-         colorLabel, colorSelectionView].forEach {
+        [nameTextField, symbolsLimitLabel, categoryContainer /*emojiLabel, emojiSelectionView,
+         colorLabel, colorSelectionView*/].forEach {  //Врменно
             contentView.addSubview($0)
         }
         
@@ -247,9 +250,13 @@ final class EventConfigurationViewController: UIViewController {
         setupScrollViewConstraints()
         setupNameTextFieldConstraints()
         setupCategoryContainerConstraints()
-        setupEmojiSectionConstraints()
-        setupColorSectionConstraints()
+        //setupEmojiSectionConstraints()
+        //setupColorSectionConstraints()
         setupButtonsConstraints()
+        
+        NSLayoutConstraint.activate([
+                contentView.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor, constant: 24)
+            ])
     }
     
     private func setupTapGesture() {
@@ -487,12 +494,15 @@ final class EventConfigurationViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapCategoryButton() {
+        // ВРЕМЕННО
+        /*
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
             self?.selectedCategory = category
             self?.updateCategoryButtonSubtitle(category)
             self?.updateCreateButtonState()
         }
         navigationController?.pushViewController(categoryVC, animated: true)
+         */
     }
     
     private func didTapCancelButton() {
@@ -516,12 +526,12 @@ final class EventConfigurationViewController: UIViewController {
             showError(message: "Название не должно превышать \(Constants.symbolsLimit) символов")
             return
         }
-        
+        /*
         guard !selectedEmoji.isEmpty else {
             showError(message: "Выберите emoji")
             return
         }
-        
+        */
         guard !selectedCategory.isEmpty else {
             showError(message: "Выберите категорию")
             return
@@ -553,8 +563,8 @@ final class EventConfigurationViewController: UIViewController {
         
         let isEnabled = !text.isEmpty &&
         nameIsValid &&
-        !selectedCategory.isEmpty &&
-        !selectedEmoji.isEmpty
+        !selectedCategory.isEmpty //&&
+      //  !selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray

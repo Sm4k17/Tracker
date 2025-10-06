@@ -347,7 +347,7 @@ final class TrackersViewController: UIViewController {
             name: "Пить воду",
             color: .systemBlue,
             emoji: "💧",
-            schedule: [.tuesday, .thursday] // Вт, Чт
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
             //Set(Week.allCases) // Ежедневно
         )
         
@@ -355,35 +355,35 @@ final class TrackersViewController: UIViewController {
             name: "Бег",
             color: .systemGreen,
             emoji: "🏃",
-            schedule: [.monday, .wednesday, .friday] // Пн, Ср, Пт
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
         )
         
         let sampleTracker3 = Tracker(
             name: "Читать",
             color: .systemOrange,
             emoji: "📚",
-            schedule: [.tuesday, .thursday] // Вт, Чт
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
         )
         
         let sampleTracker4 = Tracker(
             name: "Спать 8 часов",
             color: .systemPurple,
             emoji: "😴",
-            schedule: [.tuesday, .thursday] // Вт, Чт
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
         )
         
         let sampleTracker5 = Tracker(
             name: "Учить английский",
             color: .systemRed,
             emoji: "📖",
-            schedule: [.monday, .tuesday, .thursday, .friday] // Пн, Вт, Чт, Пт
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
         )
         
         let sampleTracker6 = Tracker(
             name: "Медитация",
             color: .systemIndigo,
             emoji: "🧘",
-            schedule: [.saturday] // Сб
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
         )
         
         let healthCategory = TrackerCategory(

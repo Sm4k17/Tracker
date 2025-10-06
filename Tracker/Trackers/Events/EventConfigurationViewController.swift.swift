@@ -27,12 +27,10 @@ final class EventConfigurationViewController: UIViewController {
         // Константы для размеров и отступов
         enum Layout {
             static let horizontalInset: CGFloat = 16
-            static let verticalSpacing: CGFloat = 12
             static let buttonHeight: CGFloat = 60
             static let cornerRadius: CGFloat = 16
             static let textFieldHeight: CGFloat = 75
             static let dropdownItemHeight: CGFloat = 75
-            static let separatorInset: CGFloat = 16
             static let symbolsLimitLabelHeight: CGFloat = 22
             
             // Используем унифицированные высоты коллекций
@@ -65,7 +63,6 @@ final class EventConfigurationViewController: UIViewController {
             static let dropdownTitle: UIColor = .ypBlack
             static let dropdownSubtitle: UIColor = .ypGray
             static let dropdownBackground: UIColor = .ypBackgroundDay
-            static let separatorColor: UIColor = .ypGray
         }
     }
     
@@ -76,10 +73,15 @@ final class EventConfigurationViewController: UIViewController {
         return scroll
     }()
     
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var contentStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 24
+        stack.isLayoutMarginsRelativeArrangement = true
+        stack.layoutMargins = UIEdgeInsets(top: 24, left: Constants.Layout.horizontalInset,
+                                           bottom: 24, right: Constants.Layout.horizontalInset)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
     }()
     
     private lazy var nameTextField: UITextField = {
@@ -96,18 +98,30 @@ final class EventConfigurationViewController: UIViewController {
             self?.updateCreateButtonState()
         }, for: .editingChanged)
         
-        textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
     
-    // Контейнер для категории
-    private lazy var categoryContainer: UIView = {
-        let view = UIView()
-        view.backgroundColor = Constants.Colors.dropdownBackground
-        view.layer.cornerRadius = Constants.Layout.cornerRadius
-        view.layer.masksToBounds = true
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var symbolsLimitLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = .ypRed
+        label.text = Constants.symbolsLimitMessage
+        label.textAlignment = .center
+        label.isHidden = true
+        label.alpha = 0
+        label.heightAnchor.constraint(equalToConstant: Constants.Layout.symbolsLimitLabelHeight).isActive = true
+        return label
+    }()
+    
+    // Унифицированный контейнер для категории (как в HabitConfigurationViewController)
+    private lazy var categoryContainer: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 0
+        stack.backgroundColor = Constants.Colors.dropdownBackground
+        stack.layer.cornerRadius = Constants.Layout.cornerRadius
+        stack.layer.masksToBounds = true
+        return stack
     }()
     
     private lazy var categoryButton: UIButton = {
@@ -122,14 +136,12 @@ final class EventConfigurationViewController: UIViewController {
     private lazy var emojiSelectionView: EmojiSelectionView = {
         let view = EmojiSelectionView()
         view.delegate = self
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     private lazy var colorSelectionView: ColorSelectionView = {
         let view = ColorSelectionView()
         view.delegate = self
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -171,21 +183,10 @@ final class EventConfigurationViewController: UIViewController {
         createSectionLabel(text: Constants.colorTitle)
     }()
     
-    private lazy var symbolsLimitLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .regular)
-        label.textColor = .ypRed
-        label.text = Constants.symbolsLimitMessage
-        label.textAlignment = .center
-        label.isHidden = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
-    private var selectedEmoji: String = "🙂" //Временно
+    private var selectedEmoji: String = "🙂" // Временно
     private var selectedColor: UIColor = .systemRed
     private var showWarningAnimationStarted = false
     private var hideWarningAnimationStarted = false
@@ -226,37 +227,46 @@ final class EventConfigurationViewController: UIViewController {
     
     private func setupViews() {
         view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        scrollView.addSubview(contentStackView)
         
-        [nameTextField, symbolsLimitLabel, categoryContainer /*emojiLabel, emojiSelectionView,
-         colorLabel, colorSelectionView*/].forEach {  //Врменно
-            contentView.addSubview($0)
-        }
+        [nameTextField, symbolsLimitLabel, categoryContainer /*emojiLabel,
+                                                              emojiSelectionView, colorLabel, colorSelectionView*/].forEach {
+                                                                  contentStackView.addArrangedSubview($0)
+                                                              }
         
-        // Добавляем кнопку категории в контейнер
-        categoryContainer.addSubview(categoryButton)
+        updateSpacing()
         
-        // Добавляем стек с кнопками отдельно от скролла
+        // Добавляем только кнопку категории в контейнер (без разделителя и второй кнопки)
+        categoryContainer.addArrangedSubview(categoryButton)
+        categoryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+        
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(cancelButton)
         buttonsStackView.addArrangedSubview(createButton)
         
-        // Настраиваем автолейаут для лейблов
-        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        colorLabel.translatesAutoresizingMaskIntoConstraints = false
+        [emojiLabel, colorLabel, emojiSelectionView, colorSelectionView, categoryButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
     }
     
     private func setupConstraints() {
-        setupScrollViewConstraints()
-        setupNameTextFieldConstraints()
-        setupCategoryContainerConstraints()
-        //setupEmojiSectionConstraints()
-        //setupColorSectionConstraints()
-        setupButtonsConstraints()
-        
         NSLayoutConstraint.activate([
-                contentView.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor, constant: 24)
-            ])
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -16),
+            
+            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
+            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
+            buttonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            buttonsStackView.heightAnchor.constraint(equalToConstant: Constants.Layout.buttonHeight)
+        ])
     }
     
     private func setupTapGesture() {
@@ -265,124 +275,73 @@ final class EventConfigurationViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
     }
     
-    // MARK: - Constraint Setup Methods
-    private func setupScrollViewConstraints() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -16),
-            
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
-        ])
-    }
-    
-    private func setupNameTextFieldConstraints() {
-        NSLayoutConstraint.activate([
-            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
-            nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset)
-        ])
-        NSLayoutConstraint.activate([
-            symbolsLimitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
-            symbolsLimitLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            symbolsLimitLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            symbolsLimitLabel.heightAnchor.constraint(equalToConstant: Constants.Layout.symbolsLimitLabelHeight)
-        ])
-    }
-    
-    private func setupCategoryContainerConstraints() {
-        NSLayoutConstraint.activate([
-            categoryContainer.topAnchor.constraint(equalTo: symbolsLimitLabel.bottomAnchor, constant: Constants.Layout.verticalSpacing),
-            categoryContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            categoryContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            categoryContainer.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight)
-        ])
-        
-        // Констрейнты для кнопки категории внутри контейнера
-        NSLayoutConstraint.activate([
-            categoryButton.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
-            categoryButton.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
-            categoryButton.trailingAnchor.constraint(equalTo: categoryContainer.trailingAnchor),
-            categoryButton.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor)
-        ])
-    }
-    
-    private func setupEmojiSectionConstraints() {
-        NSLayoutConstraint.activate([
-            emojiLabel.topAnchor.constraint(equalTo: categoryContainer.bottomAnchor, constant: 32),
-            emojiLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            
-            emojiSelectionView.topAnchor.constraint(equalTo: emojiLabel.bottomAnchor, constant: 16),
-            emojiSelectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            emojiSelectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            emojiSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.emojiCollectionHeight)
-        ])
-    }
-    
-    private func setupColorSectionConstraints() {
-        NSLayoutConstraint.activate([
-            colorLabel.topAnchor.constraint(equalTo: emojiSelectionView.bottomAnchor, constant: 16),
-            colorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            
-            colorSelectionView.topAnchor.constraint(equalTo: colorLabel.bottomAnchor, constant: 16),
-            colorSelectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            colorSelectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            colorSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.colorCollectionHeight),
-            colorSelectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
-        ])
-    }
-    
-    private func setupButtonsConstraints() {
-        NSLayoutConstraint.activate([
-            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            buttonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            buttonsStackView.heightAnchor.constraint(equalToConstant: Constants.Layout.buttonHeight)
-        ])
+    // MARK: - Dynamic Spacing Methods
+    private func updateSpacing() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if self.symbolsLimitLabel.isHidden {
+                // Когда warning скрыт - 24pt между полем и категорией
+                self.contentStackView.setCustomSpacing(24, after: self.nameTextField)
+            } else {
+                // Когда warning виден - 8pt между полем и warning, 24pt между warning и категорией
+                self.contentStackView.setCustomSpacing(8, after: self.nameTextField)
+                self.contentStackView.setCustomSpacing(24, after: self.symbolsLimitLabel)
+            }
+        }
     }
     
     // MARK: - Symbols Limit Methods
     private func checkSymbolsLimit() {
-        let symbolsCount = nameTextField.text?.count ?? 0
-        symbolsCount > Constants.symbolsLimit ? showSymbolsLimitLabel() : hideSymbolsLimitLabel()
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            let symbolsCount = self.nameTextField.text?.count ?? 0
+            symbolsCount > Constants.symbolsLimit ? self.showSymbolsLimitLabel() : self.hideSymbolsLimitLabel()
+        }
     }
     
     private func showSymbolsLimitLabel() {
         guard !showWarningAnimationStarted && symbolsLimitLabel.isHidden && !hideWarningAnimationStarted else { return }
         showWarningAnimationStarted = true
-        symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
-        symbolsLimitLabel.alpha = 0
-        symbolsLimitLabel.isHidden = false
-        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+        
+        DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.symbolsLimitLabel.transform = .identity
-            self.symbolsLimitLabel.alpha = 1
-            self.view.layoutIfNeeded()
-        }, completion: { [weak self] _ in
-            guard let self else { return }
-            self.showWarningAnimationStarted = false
-        })
+            
+            self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+            self.symbolsLimitLabel.isHidden = false
+            
+            // ОБНОВИТЬ SPACING ПЕРЕД АНИМАЦИЕЙ
+            self.updateSpacing()
+            
+            UIView.animate(withDuration: 0.3, animations: {
+                self.symbolsLimitLabel.transform = .identity
+                self.symbolsLimitLabel.alpha = 1
+                self.view.layoutIfNeeded()
+            }, completion: { _ in
+                self.showWarningAnimationStarted = false
+            })
+        }
     }
     
     private func hideSymbolsLimitLabel() {
         guard !hideWarningAnimationStarted && !symbolsLimitLabel.isHidden && !showWarningAnimationStarted else { return }
         hideWarningAnimationStarted = true
-        UIView.animate(withDuration: 0.5, animations: { [weak self] in
+        
+        DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.symbolsLimitLabel.alpha = 0
-            self.symbolsLimitLabel.isHidden = true
-            self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
-            self.view.layoutIfNeeded()
-        }) { [weak self] _ in
-            guard let self else { return }
-            self.symbolsLimitLabel.isHidden = true
-            self.symbolsLimitLabel.transform = .identity
-            self.hideWarningAnimationStarted = false
+            
+            UIView.animate(withDuration: 0.5, animations: {
+                self.symbolsLimitLabel.alpha = 0
+                self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
+                self.view.layoutIfNeeded()
+            }) { _ in
+                self.symbolsLimitLabel.isHidden = true
+                self.symbolsLimitLabel.transform = .identity
+                
+                // ОБНОВИТЬ SPACING ПОСЛЕ СКРЫТИЯ
+                self.updateSpacing()
+                
+                self.hideWarningAnimationStarted = false
+            }
         }
     }
     
@@ -405,7 +364,6 @@ final class EventConfigurationViewController: UIViewController {
         button.backgroundColor = .clear
         button.contentHorizontalAlignment = .left
         button.layer.masksToBounds = true
-        button.translatesAutoresizingMaskIntoConstraints = false
         
         // Создаем вертикальный стек для заголовка и подзаголовка
         let textStack = UIStackView()
@@ -431,7 +389,6 @@ final class EventConfigurationViewController: UIViewController {
         // Добавляем стрелочку
         let arrowImageView = UIImageView()
         arrowImageView.image = UIImage(named: "chevron")
-        
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         
@@ -470,7 +427,6 @@ final class EventConfigurationViewController: UIViewController {
         button.setTitleColor(titleColor, for: .normal)
         button.layer.cornerRadius = Constants.Layout.cornerRadius
         button.layer.masksToBounds = true
-        button.translatesAutoresizingMaskIntoConstraints = false
         
         if let borderColor = borderColor {
             button.layer.borderWidth = 1
@@ -487,7 +443,6 @@ final class EventConfigurationViewController: UIViewController {
         if let textStack = categoryButton.subviews.first(where: { $0 is UIStackView }) as? UIStackView,
            let subtitleLabel = textStack.arrangedSubviews.last as? UILabel {
             subtitleLabel.text = subtitle
-            // Используем тот же цвет что и для заголовка
             subtitleLabel.textColor = Constants.Colors.dropdownSubtitle
         }
     }
@@ -496,12 +451,12 @@ final class EventConfigurationViewController: UIViewController {
     private func didTapCategoryButton() {
         // ВРЕМЕННО
         /*
-        let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
-            self?.selectedCategory = category
-            self?.updateCategoryButtonSubtitle(category)
-            self?.updateCreateButtonState()
-        }
-        navigationController?.pushViewController(categoryVC, animated: true)
+         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
+         self?.selectedCategory = category
+         self?.updateCategoryButtonSubtitle(category)
+         self?.updateCreateButtonState()
+         }
+         navigationController?.pushViewController(categoryVC, animated: true)
          */
     }
     
@@ -509,7 +464,6 @@ final class EventConfigurationViewController: UIViewController {
         if let creationVC = navigationController?.viewControllers.first(where: { $0 is CreationTrackerViewController }) {
             navigationController?.popToViewController(creationVC, animated: true)
         } else {
-            // Если не нашли CreationTrackerViewController, просто pop
             navigationController?.popViewController(animated: true)
         }
     }
@@ -526,12 +480,14 @@ final class EventConfigurationViewController: UIViewController {
             showError(message: "Название не должно превышать \(Constants.symbolsLimit) символов")
             return
         }
+        
         /*
-        guard !selectedEmoji.isEmpty else {
-            showError(message: "Выберите emoji")
-            return
-        }
-        */
+         guard !selectedEmoji.isEmpty else {
+         showError(message: "Выберите emoji")
+         return
+         }
+         */
+        
         guard !selectedCategory.isEmpty else {
             showError(message: "Выберите категорию")
             return
@@ -564,12 +520,11 @@ final class EventConfigurationViewController: UIViewController {
         let isEnabled = !text.isEmpty &&
         nameIsValid &&
         !selectedCategory.isEmpty //&&
-      //  !selectedEmoji.isEmpty
+        //  !selectedEmoji.isEmpty
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
         
-        // Повторная проверка через секунду на случай наложения анимаций
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             self?.checkSymbolsLimit()
         }

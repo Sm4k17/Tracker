@@ -20,74 +20,103 @@ final class TrackersViewController: UIViewController {
         
         // Константы для размеров и отступов
         enum Layout {
-            static let datePickerWidth: CGFloat = 95
-            static let searchBarHeight: CGFloat = 36
-            static let searchBarTopInset: CGFloat = 10
-            static let searchBarHorizontalInset: CGFloat = 16
+            // Navigation
+            static let datePickerWidth: CGFloat = 77
+            static let datePickerHeight: CGFloat = 34
+            
+            // Content
             static let collectionViewTopInset: CGFloat = 16
+            
+            // Placeholder
             static let placeholderImageSize: CGFloat = 80
             static let placeholderSpacing: CGFloat = 8
+            
+            // COLLECTION VIEW CONSTANTS
+            static let collectionItemSpacing: CGFloat = 12
+            static let collectionLineSpacing: CGFloat = 16
+            static let collectionSectionInsetTop: CGFloat = 12
+            static let collectionSectionInsetLeft: CGFloat = 16
+            static let collectionSectionInsetBottom: CGFloat = 16
+            static let collectionSectionInsetRight: CGFloat = 16
+            static let collectionItemHeight: CGFloat = 148
+            static let collectionHeaderHeight: CGFloat = 18
+            static let collectionItemsPerRow: CGFloat = 2
+            
+            // КОНСТАНТЫ ДЛЯ SEARCH CONTROLLER
+            static let searchTextFieldCornerRadius: CGFloat = 10
+            static let searchTextFieldFontSize: CGFloat = 17
+            
+            // Вычисляемые константы
+            static var collectionTotalHorizontalInset: CGFloat {
+                collectionSectionInsetLeft + collectionSectionInsetRight + collectionItemSpacing
+            }
+        }
+        
+        // ЦВЕТА ДЛЯ ТЕКСТА
+        enum Colors {
+            static let searchPlaceholder: UIColor = .ypGray
+            static let searchText: UIColor = .ypBlack
+            static let dateButtonText: UIColor = .ypBlack
+            static let searchBackground: UIColor = .ypGrayS
         }
     }
     
+    // MARK: - Properties
+    private var categories: [TrackerCategory] = [] {
+        didSet {
+            // ПРИ ИЗМЕНЕНИИ КАТЕГОРИЙ АВТОМАТИЧЕСКИ ОБНОВЛЯЕМ ФИЛЬТРАЦИЮ
+            filterTrackersForCurrentDate()
+        }
+    }
+    private var completedTrackers: [TrackerRecord] = []
+    private var currentDate: Date = Date()
+    private var filteredCategories: [TrackerCategory] = []
+    
     // MARK: - UI Components
-    private lazy var navigationBar: UINavigationBar = {
-        let bar = UINavigationBar()
-        bar.barTintColor = .ypWhite
-        return bar
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .ypWhite
+        return view
     }()
     
     // Кнопка "+" в левой части navigation bar
     private lazy var addButton: UIBarButtonItem = {
+        let buttonImage = UIImage(named: Constants.addButtonImageName) ?? UIImage(systemName: "plus")
         let button = UIBarButtonItem(
-            image: UIImage(systemName: Constants.addButtonImageName),
-            style: .plain,
-            target: self,
-            action: #selector(didTapAddButton)
+            image: buttonImage,
+            primaryAction: UIAction { [weak self] _ in
+                self?.didTapAddButton()
+            }
         )
         button.tintColor = .ypBlack
         return button
     }()
     
-    // DatePicker для выбора даты в правой части navigation bar
+    // Основной DatePicker
     private lazy var datePicker: UIDatePicker = {
-        let picker = UIDatePicker()
-        picker.preferredDatePickerStyle = .compact
-        picker.datePickerMode = .date
-        picker.locale = Locale(identifier: "ru_CH")
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.tintColor = .ypBlack
         
-        // Черный цвет текста даты
-        if #available(iOS 14.0, *) {
-            picker.tintColor = .ypBlack
-        } else {
-            picker.setValue(UIColor.ypBlack, forKey: "textColor")
-        }
-        return picker
+        datePicker.addAction(UIAction { [weak self] _ in
+            self?.dateChanged(datePicker)
+        }, for: .valueChanged)
+        
+        return datePicker
     }()
     
-    // Search bar для поиска трекеров
-    private lazy var searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.placeholder = Constants.searchPlaceholder
-        searchBar.searchBarStyle = .minimal
+    // SearchController для поиска трекеров
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = Constants.searchPlaceholder
+        searchController.searchBar.delegate = self
         
-        // Настройка внешнего вида
-        searchBar.searchTextField.backgroundColor = .clear
-        searchBar.tintColor = .systemBlue
-        searchBar.searchTextField.textColor = .ypBlack
-        searchBar.searchTextField.font = .systemFont(ofSize: 16)
-        
-        // Убираем стандартные фоны
-        searchBar.backgroundImage = UIImage()
-        searchBar.setBackgroundImage(UIImage(), for: .any, barMetrics: .default)
-        
-        // Кастомная граница
-        searchBar.searchTextField.layer.borderWidth = 1
-        searchBar.searchTextField.layer.borderColor = UIColor.systemGray4.cgColor
-        searchBar.searchTextField.layer.cornerRadius = 8
-        searchBar.searchTextField.layer.masksToBounds = true
-        
-        return searchBar
+        return searchController
     }()
     
     // StackView для размещения иконки и текста плейсхолдера
@@ -122,9 +151,29 @@ final class TrackersViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         
+        // ИСПОЛЬЗУЕМ КОНСТАНТЫ ДЛЯ НАСТРОЙКИ LAYOUT
+        layout.minimumInteritemSpacing = Constants.Layout.collectionItemSpacing
+        layout.minimumLineSpacing = Constants.Layout.collectionLineSpacing
+        layout.sectionInset = UIEdgeInsets(
+            top: Constants.Layout.collectionSectionInsetTop,
+            left: Constants.Layout.collectionSectionInsetLeft,
+            bottom: Constants.Layout.collectionSectionInsetBottom,
+            right: Constants.Layout.collectionSectionInsetRight
+        )
+        
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collection.backgroundColor = .ypWhite
-        collection.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        collection.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "TrackerCell")
+        collection.register(
+            SupplementaryView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: "Header"
+        )
+        
+        // ДОБАВИМ ДЛЯ БУДУЩЕГО ИСПОЛЬЗОВАНИЯ
+        collection.showsVerticalScrollIndicator = false
+        collection.alwaysBounceVertical = true
+        
         return collection
     }()
     
@@ -132,6 +181,10 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupNavigationBar()
+        setupCollectionView()
+        loadSampleData()
+        updatePlaceholderVisibility()
     }
     
     // MARK: - Setup
@@ -139,82 +192,396 @@ final class TrackersViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupViews()
         setupConstraints()
-        setupNavigationBarAppearance()
+        setupTapGesture()
+    }
+    
+    // MARK: - Date Formatter
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yy"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
+    
+    private func setupCollectionView() {
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.keyboardDismissMode = .onDrag
+    }
+    
+    private func setupNavigationBar() {
+        title = Constants.navigationTitle
+        navigationItem.leftBarButtonItem = addButton
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        // ✅ НАСТРОЙКА LARGE TITLE
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
+        // Настройка внешнего вида navigation bar
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+        
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        definesPresentationContext = true
     }
     
     private func setupViews() {
-        // Добавляем все view в иерархию и отключаем авто-размеры
-        [navigationBar, searchBar, placeholderStackView, collectionView].forEach {
+        // Обновленная иерархия
+        [contentView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
         
-        // Добавляем элементы в stack view
+        [placeholderStackView, collectionView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview($0)
+        }
+        
         placeholderStackView.addArrangedSubview(placeholderImageView)
         placeholderStackView.addArrangedSubview(placeholderLabel)
-        
-        // Настройка navigation bar
-        let navItem = UINavigationItem(title: Constants.navigationTitle)
-        navItem.leftBarButtonItem = addButton
-        navItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        navigationBar.items = [navItem]
-        
-        // Настройка datePicker constraints
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Отступы для текста в search bar
-        searchBar.searchTextPositionAdjustment = UIOffset(horizontal: 8, vertical: 0)
-        
-        collectionView.isHidden = true
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Navigation Bar - привязываем к safe area сверху и по бокам
-            navigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            navigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            navigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            // Date Picker - фиксированная ширина
-            datePicker.widthAnchor.constraint(equalToConstant: Constants.Layout.datePickerWidth),
+            // Content View
+            contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
+                                             constant: Constants.Layout.collectionViewTopInset),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            // Search Bar - под navigation bar с отступами
-            searchBar.topAnchor.constraint(equalTo: navigationBar.bottomAnchor,
-                                          constant: Constants.Layout.searchBarTopInset),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor,
-                                              constant: Constants.Layout.searchBarHorizontalInset),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor,
-                                               constant: -Constants.Layout.searchBarHorizontalInset),
-            searchBar.heightAnchor.constraint(equalToConstant: Constants.Layout.searchBarHeight),
+            // Collection View внутри contentView
+            collectionView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            // Collection View - растягиваем на весь оставшийся экран
-            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor,
-                                               constant: Constants.Layout.collectionViewTopInset),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            // Placeholder Stack View
+            placeholderStackView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            placeholderStackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
-            // Placeholder Stack View - центрируем по всему экрану
-            placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
-            // Placeholder Image - фиксированный размер
+            // Placeholder Image
             placeholderImageView.widthAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
-            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize)
+            placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
+            
+            //datePicker
+            datePicker.widthAnchor.constraint(equalToConstant: 100)
         ])
     }
     
-    // Отдельный метод для настройки внешнего вида navigation bar
-    private func setupNavigationBarAppearance() {
-        navigationBar.titleTextAttributes = [
-            .foregroundColor: UIColor.ypBlack,
-            .font: UIFont.systemFont(ofSize: 17, weight: .bold)
-        ]
+    // MARK: - Helper Methods
+    private func calculateCollectionViewItemSize() -> CGSize {
+        let totalWidth = view.bounds.width - Constants.Layout.collectionTotalHorizontalInset
+        let itemWidth = totalWidth / Constants.Layout.collectionItemsPerRow
+        
+        return CGSize(
+            width: itemWidth,
+            height: Constants.Layout.collectionItemHeight
+        )
+    }
+    
+    private func updatePlaceholderVisibility() {
+        let isEmpty = filteredCategories.isEmpty || filteredCategories.allSatisfy { $0.trackers.isEmpty }
+        placeholderStackView.isHidden = !isEmpty
+        collectionView.isHidden = isEmpty
+    }
+    
+    private func filterTrackersForCurrentDate() {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: currentDate)
+        
+        let systemWeekday = weekday
+        let ourWeekday: Week
+        
+        switch systemWeekday {
+        case 1: ourWeekday = .sunday
+        case 2: ourWeekday = .monday
+        case 3: ourWeekday = .tuesday
+        case 4: ourWeekday = .wednesday
+        case 5: ourWeekday = .thursday
+        case 6: ourWeekday = .friday
+        case 7: ourWeekday = .saturday
+        default: ourWeekday = .monday
+        }
+        
+        // ФИЛЬТРУЕМ БЕЗ СОЗДАНИЯ ДУБЛИРОВАННЫХ КАТЕГОРИЙ
+        filteredCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.scheduleTrackers.isEmpty || tracker.scheduleTrackers.contains(ourWeekday)
+            }
+            // ВОЗВРАЩАЕМ nil ЕСЛИ НЕТ ТРЕКЕРОВ, ЧТОБЫ ИСКЛЮЧИТЬ ПУСТЫЕ КАТЕГОРИИ
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
+        
+        collectionView.reloadData()
+        updatePlaceholderVisibility()
+    }
+    
+    private func isTrackerCompletedToday(id: UUID) -> Bool {
+        completedTrackers.contains { record in
+            record.trackerId == id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+        }
+    }
+    
+    private func completedDaysCount(for trackerId: UUID) -> Int {
+        completedTrackers.filter { $0.trackerId == trackerId }.count
+    }
+    
+    private func dayString(for count: Int) -> String {
+        let lastDigit = count % 10
+        let lastTwoDigits = count % 100
+        
+        if lastDigit == 1 && lastTwoDigits != 11 { return "день" }
+        if (2...4).contains(lastDigit) && !(12...14).contains(lastTwoDigits) { return "дня" }
+        return "дней"
+    }
+    
+    // MARK: - Temporary Sample Data
+    private func loadSampleData() {
+        let sampleTracker1 = Tracker(
+            name: "Пить воду",
+            color: .systemBlue,
+            emoji: "💧",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+            //Set(Week.allCases) // Ежедневно
+        )
+        
+        let sampleTracker2 = Tracker(
+            name: "Бег",
+            color: .systemGreen,
+            emoji: "🏃",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+        )
+        
+        let sampleTracker3 = Tracker(
+            name: "Читать",
+            color: .systemOrange,
+            emoji: "📚",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+        )
+        
+        let sampleTracker4 = Tracker(
+            name: "Спать 8 часов",
+            color: .systemPurple,
+            emoji: "😴",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+        )
+        
+        let sampleTracker5 = Tracker(
+            name: "Учить английский",
+            color: .systemRed,
+            emoji: "📖",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+        )
+        
+        let sampleTracker6 = Tracker(
+            name: "Медитация",
+            color: .systemIndigo,
+            emoji: "🧘",
+            schedule: [.tuesday, .thursday, .friday] // Вт, Чт, Пт
+        )
+        
+        let healthCategory = TrackerCategory(
+            title: "Здоровье",
+            trackers: [sampleTracker1, sampleTracker2, sampleTracker4]
+        )
+        
+        let educationCategory = TrackerCategory(
+            title: "Образование",
+            trackers: [sampleTracker3, sampleTracker5]
+        )
+        
+        let personalCategory = TrackerCategory(
+            title: "Личное",
+            trackers: [sampleTracker6]
+        )
+        
+        categories = [healthCategory, educationCategory, personalCategory]
+        filterTrackersForCurrentDate()
+    }
+    
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Actions
-    @objc private func didTapAddButton() {
-        print("Add button tapped")
+    @objc private func handleTap() {
+        view.endEditing(true)
+    }
+    
+    private func didTapAddButton() {
+        let creationVC = CreationTrackerViewController(delegate: self)
+        let navigationController = UINavigationController(rootViewController: creationVC)
+        present(navigationController, animated: true)
+    }
+    
+    private func dateChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Date changed: \(formattedDate)")
+        
+        currentDate = selectedDate
+        filterTrackersForCurrentDate()
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension TrackersViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return filteredCategories.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return filteredCategories[section].trackers.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "TrackerCell",
+            for: indexPath
+        ) as? TrackerCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
+        let isCompletedToday = isTrackerCompletedToday(id: tracker.idTrackers)
+        let completedDays = completedDaysCount(for: tracker.idTrackers)
+        
+        let viewModel = TrackerViewModel(
+            tracker: tracker,
+            isCompletedToday: isCompletedToday,
+            completedDays: completedDays
+        )
+        
+        cell.configure(with: viewModel)
+        cell.delegate = self
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "Header",
+            for: indexPath
+        ) as? SupplementaryView else {
+            return UICollectionReusableView()
+        }
+        
+        let category = filteredCategories[indexPath.section]
+        header.configure(category.title)
+        return header
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return calculateCollectionViewItemSize()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: Constants.Layout.collectionHeaderHeight)
+    }
+}
+
+// MARK: - UISearchResultsUpdating
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else { return }
+        print("Search text: \(searchText)")
+        // Здесь будет логика фильтрации по поиску
+    }
+}
+
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        view.endEditing(true)
+    }
+}
+
+// MARK: - TrackerCellDelegate
+extension TrackersViewController: TrackerCellDelegate {
+    func didTapPlusButton(in cell: TrackerCollectionViewCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
+        let trackerId = tracker.idTrackers
+        
+        // Проверяем, можно ли отметить трекер на выбранную дату
+        let today = Calendar.current.startOfDay(for: Date())
+        let selectedDate = Calendar.current.startOfDay(for: currentDate)
+        
+        guard selectedDate <= today else {
+            print("⚠️ Нельзя отметить трекер для будущей даты: \(currentDate)")
+            return
+        }
+        
+        // Переключаем состояние выполнения с анимацией
+        collectionView.performBatchUpdates {
+            if let index = completedTrackers.firstIndex(where: { record in
+                record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+            }) {
+                completedTrackers.remove(at: index)
+                print("❌ Удалили запись выполнения")
+            } else {
+                let record = TrackerRecord(trackerId: trackerId, date: currentDate)
+                completedTrackers.append(record)
+                print("✅ Добавили запись выполнения")
+            }
+            
+            // Обновляем только нужную ячейку с анимацией
+            collectionView.reloadItems(at: [indexPath])
+        }
+    }
+}
+
+// MARK: - TrackerViewControllerDelegate
+extension TrackersViewController: TrackerViewControllerDelegate {
+    func didCreateNewTracker(_ tracker: Tracker, categoryTitle: String) {
+        dismiss(animated: true)
+        
+        let finalCategoryTitle = categoryTitle.isEmpty ? "Мои трекеры" : categoryTitle
+        
+        // Находим индекс категории, если она существует
+        if let categoryIndex = categories.firstIndex(where: { $0.title == finalCategoryTitle }) {
+            // Обновляем существующую категорию с анимацией
+            let category = categories[categoryIndex]
+            var updatedTrackers = category.trackers
+            updatedTrackers.append(tracker)
+            
+            // Находим индекс в filteredCategories
+            if let filteredCategoryIndex = filteredCategories.firstIndex(where: { $0.title == finalCategoryTitle }) {
+                let newIndexPath = IndexPath(item: updatedTrackers.count - 1, section: filteredCategoryIndex)
+                
+                collectionView.performBatchUpdates {
+                    categories[categoryIndex] = TrackerCategory(title: category.title, trackers: updatedTrackers)
+                    filteredCategories[filteredCategoryIndex] = TrackerCategory(title: category.title, trackers: updatedTrackers)
+                    collectionView.insertItems(at: [newIndexPath])
+                }
+            }
+        } else {
+            // Создаем новую категорию с анимацией
+            let newCategory = TrackerCategory(title: finalCategoryTitle, trackers: [tracker])
+            
+            collectionView.performBatchUpdates {
+                categories.append(newCategory)
+                // filteredCategories автоматически обновится благодаря didSet
+                let newSectionIndex = filteredCategories.count - 1
+                collectionView.insertSections(IndexSet(integer: newSectionIndex))
+            }
+        }
+    }
+    
+    func didCancelTrackerCreation() {
+        dismiss(animated: true)
     }
 }
 
@@ -223,6 +590,6 @@ final class TrackersViewController: UIViewController {
 @available(iOS 17, *)
 #Preview("Trackers View") {
     let viewController = TrackersViewController()
-    return viewController
+    return UINavigationController(rootViewController: viewController)
 }
 #endif

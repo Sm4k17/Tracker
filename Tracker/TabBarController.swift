@@ -94,14 +94,12 @@ final class TabBarController: UITabBarController {
     private func createTrackersViewController() -> UINavigationController {
         let trackersViewController = TrackersViewController()
         let navigationController = UINavigationController(rootViewController: trackersViewController)
-        navigationController.navigationBar.isHidden = true
         return navigationController
     }
 
     private func createStatsViewController() -> UINavigationController {
         let statsViewController = StatisticViewController()
         let navigationController = UINavigationController(rootViewController: statsViewController)
-        navigationController.navigationBar.isHidden = true 
         return navigationController
     }
 }

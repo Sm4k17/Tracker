@@ -109,7 +109,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         delegate?.didTapPlusButton(in: self)
     }
     
-    func configure(with viewModel: TrackerViewModel) {
+    func configure(with viewModel: TrackerViewModel, animated: Bool = false) {
         trackerId = viewModel.tracker.idTrackers
         titleLabel.text = viewModel.tracker.name
         emojiLabel.text = viewModel.tracker.emoji
@@ -117,15 +117,39 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         daysCountLabel.text = "\(viewModel.completedDays) \(dayString(for: viewModel.completedDays))"
         
-        // Настройка кнопки
-        if viewModel.isCompletedToday {
-            plusButton.backgroundColor = viewModel.tracker.color.withAlphaComponent(0.3)
-            plusButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-            plusButton.tintColor = .white
+        let changes = {
+            if viewModel.isFutureDate {
+                // ДЛЯ БУДУЩИХ ДНЕЙ - полупрозрачная и неактивная
+                self.plusButton.backgroundColor = viewModel.tracker.color.withAlphaComponent(0.3)
+                self.plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                self.plusButton.tintColor = .white
+                self.plusButton.isEnabled = false
+                self.plusButton.alpha = 1.0
+            } else if viewModel.isCompletedToday {
+                // УЖЕ ВЫПОЛНЕН СЕГОДНЯ
+                self.plusButton.backgroundColor = viewModel.tracker.color.withAlphaComponent(0.3)
+                self.plusButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                self.plusButton.tintColor = .white
+                self.plusButton.isEnabled = true
+                self.plusButton.alpha = 1.0
+            } else {
+                // ДОСТУПЕН ДЛЯ ВЫПОЛНЕНИЯ
+                self.plusButton.backgroundColor = viewModel.tracker.color
+                self.plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                self.plusButton.tintColor = .white
+                self.plusButton.isEnabled = true
+                self.plusButton.alpha = 1.0
+            }
+        }
+        
+        if animated {
+            // Анимация только для сегодняшних дней при изменении состояния
+            UIView.animate(withDuration: 0.3) {
+                changes()
+            }
         } else {
-            plusButton.backgroundColor = viewModel.tracker.color
-            plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
-            plusButton.tintColor = .white
+            // Без анимации для первоначальной настройки
+            changes()
         }
     }
     

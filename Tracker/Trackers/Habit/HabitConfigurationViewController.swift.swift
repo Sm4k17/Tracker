@@ -220,7 +220,7 @@ final class HabitConfigurationViewController: UIViewController {
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
     private var selectedSchedule: Set<Week> = []
-    private var selectedEmoji: String = "🙂" //Временная заглушка
+    private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .systemRed
     private var showWarningAnimationStarted = false
     private var hideWarningAnimationStarted = false
@@ -263,10 +263,10 @@ final class HabitConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
         
-        [nameTextField, symbolsLimitLabel, categoryScheduleStack /*emojiLabel,
-                                                                  emojiSelectionView, colorLabel, colorSelectionView*/].forEach {
-                                                                      contentStackView.addArrangedSubview($0)
-                                                                  }
+        [nameTextField, symbolsLimitLabel, categoryScheduleStack, emojiLabel,
+         emojiSelectionView, colorLabel, colorSelectionView].forEach {
+            contentStackView.addArrangedSubview($0)
+        }
         
         updateSpacing()
         
@@ -283,6 +283,9 @@ final class HabitConfigurationViewController: UIViewController {
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(cancelButton)
         buttonsStackView.addArrangedSubview(createButton)
+        
+        emojiSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.emojiCollectionHeight).isActive = true
+        colorSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.colorCollectionHeight).isActive = true
         
         [emojiLabel, colorLabel, emojiSelectionView, colorSelectionView,
          categoryButton, scheduleButton].forEach {
@@ -552,12 +555,15 @@ final class HabitConfigurationViewController: UIViewController {
             return
         }
         
-        /*
-         guard !selectedEmoji.isEmpty else {
-         showError(message: "Выберите emoji")
-         return
-         }
-         */
+        guard !selectedEmoji.isEmpty else {
+            showError(message: "Выберите emoji")
+            return
+        }
+        
+        guard selectedColor != .systemRed else {
+            showError(message: "Выберите цвет")
+            return
+        }
         
         guard !selectedCategory.isEmpty else {
             showError(message: "Выберите категорию")
@@ -591,8 +597,9 @@ final class HabitConfigurationViewController: UIViewController {
         
         let isEnabled = nameIsValid &&
         !selectedCategory.isEmpty &&
-        !selectedSchedule.isEmpty //&&
-        //!selectedEmoji.isEmpty
+        !selectedSchedule.isEmpty &&
+        !selectedEmoji.isEmpty &&
+        selectedColor != .systemRed
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray

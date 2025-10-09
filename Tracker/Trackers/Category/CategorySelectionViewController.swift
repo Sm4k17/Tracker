@@ -149,11 +149,11 @@ final class CategorySelectionViewController: UIViewController {
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             addCategoryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                                                      constant: Constants.buttonHorizontalInset),
+                                                       constant: Constants.buttonHorizontalInset),
             addCategoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                                                       constant: -Constants.buttonHorizontalInset),
+                                                        constant: -Constants.buttonHorizontalInset),
             addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                                     constant: -Constants.buttonBottomOffset),
+                                                      constant: -Constants.buttonBottomOffset),
             
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -183,7 +183,10 @@ final class CategorySelectionViewController: UIViewController {
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
             self?.categories.append(newCategory)
             self?.updateUIState()
-            self?.tableView.reloadData()
+            
+            // ЗАМЕНА: вместо reloadData используем вставку новой строки
+            let newIndexPath = IndexPath(row: (self?.categories.count ?? 1) - 1, section: 0)
+            self?.tableView.insertRows(at: [newIndexPath], with: .automatic)
         }
         navigationController?.pushViewController(addCategoryVC, animated: true)
     }

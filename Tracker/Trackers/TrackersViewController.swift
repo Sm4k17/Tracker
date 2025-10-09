@@ -309,16 +309,27 @@ final class TrackersViewController: UIViewController {
         default: ourWeekday = .monday
         }
         
-        // ФИЛЬТРУЕМ БЕЗ СОЗДАНИЯ ДУБЛИРОВАННЫХ КАТЕГОРИЙ
+        let oldFilteredCategories = filteredCategories
+        
         filteredCategories = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
                 tracker.scheduleTrackers.isEmpty || tracker.scheduleTrackers.contains(ourWeekday)
             }
-            // ВОЗВРАЩАЕМ nil ЕСЛИ НЕТ ТРЕКЕРОВ, ЧТОБЫ ИСКЛЮЧИТЬ ПУСТЫЕ КАТЕГОРИИ
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
         
-        collectionView.reloadData()
+        // ПРОСТАЯ ПРОВЕРКА: если количество секций изменилось - reloadData
+        if oldFilteredCategories.count != filteredCategories.count {
+            collectionView.reloadData()
+        } else {
+            // Иначе обновляем существующие секции с анимацией
+            collectionView.performBatchUpdates {
+                for section in 0..<filteredCategories.count {
+                    collectionView.reloadSections(IndexSet(integer: section))
+                }
+            }
+        }
+        
         updatePlaceholderVisibility()
     }
     
@@ -457,10 +468,12 @@ extension TrackersViewController: UICollectionViewDataSource {
         let viewModel = TrackerViewModel(
             tracker: tracker,
             isCompletedToday: isCompletedToday,
-            completedDays: completedDays
+            completedDays: completedDays,
+            currentDate: currentDate
         )
         
-        cell.configure(with: viewModel)
+        // Без анимации для первоначальной настройки
+        cell.configure(with: viewModel, animated: false)
         cell.delegate = self
         
         return cell
@@ -515,7 +528,6 @@ extension TrackersViewController: TrackerCellDelegate {
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
         let trackerId = tracker.idTrackers
         
-        // Проверяем, можно ли отметить трекер на выбранную дату
         let today = Calendar.current.startOfDay(for: Date())
         let selectedDate = Calendar.current.startOfDay(for: currentDate)
         
@@ -524,21 +536,31 @@ extension TrackersViewController: TrackerCellDelegate {
             return
         }
         
-        // Переключаем состояние выполнения с анимацией
         collectionView.performBatchUpdates {
             if let index = completedTrackers.firstIndex(where: { record in
                 record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
             }) {
                 completedTrackers.remove(at: index)
-                print("❌ Удалили запись выполнения")
             } else {
                 let record = TrackerRecord(trackerId: trackerId, date: currentDate)
                 completedTrackers.append(record)
-                print("✅ Добавили запись выполнения")
             }
             
-            // Обновляем только нужную ячейку с анимацией
-            collectionView.reloadItems(at: [indexPath])
+            // Обновляем ячейку С АНИМАЦИЕЙ
+            if let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell {
+                let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
+                let isCompletedToday = isTrackerCompletedToday(id: tracker.idTrackers)
+                let completedDays = completedDaysCount(for: tracker.idTrackers)
+                
+                let viewModel = TrackerViewModel(
+                    tracker: tracker,
+                    isCompletedToday: isCompletedToday,
+                    completedDays: completedDays,
+                    currentDate: currentDate
+                )
+                
+                cell.configure(with: viewModel, animated: true) // С анимацией!
+            }
         }
     }
 }

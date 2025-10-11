@@ -451,6 +451,9 @@ final class TrackersViewController: UIViewController {
         
         currentDate = selectedDate
         filterTrackersForCurrentDate()
+        
+        // Принудительно обновляем все видимые ячейки
+        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 }
 

@@ -10,7 +10,7 @@ import UIKit
 final class EmojiSelectionView: UIView {
     
     // MARK: - Constants
-     enum Constants {
+    enum Constants {
         static let emojis = [
             "🙂", "😻", "🌺", "🐶", "❤️", "😱",
             "😇", "😡", "🥶", "🤔", "🙌", "🍔",
@@ -84,8 +84,29 @@ final class EmojiSelectionView: UIView {
     
     // MARK: - Public Methods
     func setSelectedEmoji(_ emoji: String) {
+        let oldSelectedEmoji = selectedEmoji
         selectedEmoji = emoji
-        collectionView.reloadData()
+        
+        // Находим индексы старого и нового выбранного emoji
+        var indexPathsToUpdate: [IndexPath] = []
+        
+        if let oldIndex = Constants.emojis.firstIndex(of: oldSelectedEmoji) {
+            indexPathsToUpdate.append(IndexPath(item: oldIndex, section: 0))
+        }
+        
+        if let newIndex = Constants.emojis.firstIndex(of: emoji) {
+            indexPathsToUpdate.append(IndexPath(item: newIndex, section: 0))
+        }
+        
+        // Убираем дубликаты (если старый и новый emoji одинаковые)
+        indexPathsToUpdate = Array(Set(indexPathsToUpdate))
+        
+        // Если есть что обновлять - обновляем только нужные ячейки
+        if !indexPathsToUpdate.isEmpty {
+            collectionView.performBatchUpdates({
+                self.collectionView.reloadItems(at: indexPathsToUpdate)
+            })
+        }
     }
     
     func calculateHeight() -> CGFloat {
@@ -100,7 +121,13 @@ extension EmojiSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EmojiCell", for: indexPath) as! EmojiCell
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "EmojiCell",
+            for: indexPath
+        ) as? EmojiCell else {
+            return UICollectionViewCell()
+        }
+        
         let emoji = Constants.emojis[indexPath.item]
         let isSelected = emoji == selectedEmoji
         cell.configure(with: emoji, isSelected: isSelected)
@@ -120,8 +147,19 @@ extension EmojiSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let oldSelectedIndex = Constants.emojis.firstIndex(of: selectedEmoji)
         selectedEmoji = Constants.emojis[indexPath.item]
-        collectionView.reloadData()
+        
+        // ЗАМЕНА: обновляем только старую и новую выбранную ячейку
+        var indexPathsToUpdate = [indexPath]
+        if let oldIndex = oldSelectedIndex, oldIndex != indexPath.item {
+            indexPathsToUpdate.append(IndexPath(item: oldIndex, section: 0))
+        }
+        
+        collectionView.performBatchUpdates {
+            collectionView.reloadItems(at: indexPathsToUpdate)
+        }
+        
         delegate?.didSelectEmoji(selectedEmoji)
     }
 }

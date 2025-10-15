@@ -186,7 +186,7 @@ final class EventConfigurationViewController: UIViewController {
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
     private var selectedCategory: String = ""
-    private var selectedEmoji: String = "🙂" // Временно
+    private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .systemRed
     private var showWarningAnimationStarted = false
     private var hideWarningAnimationStarted = false
@@ -229,16 +229,19 @@ final class EventConfigurationViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
         
-        [nameTextField, symbolsLimitLabel, categoryContainer /*emojiLabel,
-                                                              emojiSelectionView, colorLabel, colorSelectionView*/].forEach {
-                                                                  contentStackView.addArrangedSubview($0)
-                                                              }
+        [nameTextField, symbolsLimitLabel, categoryContainer, emojiLabel,
+         emojiSelectionView, colorLabel, colorSelectionView].forEach {
+            contentStackView.addArrangedSubview($0)
+        }
         
         updateSpacing()
         
         // Добавляем только кнопку категории в контейнер (без разделителя и второй кнопки)
         categoryContainer.addArrangedSubview(categoryButton)
         categoryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+        
+        emojiSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.emojiCollectionHeight).isActive = true
+        colorSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.colorCollectionHeight).isActive = true
         
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(cancelButton)
@@ -481,12 +484,15 @@ final class EventConfigurationViewController: UIViewController {
             return
         }
         
-        /*
-         guard !selectedEmoji.isEmpty else {
-         showError(message: "Выберите emoji")
-         return
-         }
-         */
+        guard !selectedEmoji.isEmpty else {
+            showError(message: "Выберите emoji")
+            return
+        }
+        
+        guard selectedColor != .systemRed else {
+            showError(message: "Выберите цвет")
+            return
+        }
         
         guard !selectedCategory.isEmpty else {
             showError(message: "Выберите категорию")
@@ -519,8 +525,9 @@ final class EventConfigurationViewController: UIViewController {
         
         let isEnabled = !text.isEmpty &&
         nameIsValid &&
-        !selectedCategory.isEmpty //&&
-        //  !selectedEmoji.isEmpty
+        !selectedCategory.isEmpty &&
+        !selectedEmoji.isEmpty &&
+        selectedColor != .systemRed
         
         createButton.isEnabled = isEnabled
         createButton.backgroundColor = isEnabled ? .ypBlack : .ypGray

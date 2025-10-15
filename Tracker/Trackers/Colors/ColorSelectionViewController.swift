@@ -10,7 +10,7 @@ import UIKit
 final class ColorSelectionView: UIView {
     
     // MARK: - Constants
-     enum Constants {
+    enum Constants {
         static let colors: [UIColor] = [
             .colorSelection1, .colorSelection2, .colorSelection3,
             .colorSelection4, .colorSelection5, .colorSelection6,
@@ -87,8 +87,29 @@ final class ColorSelectionView: UIView {
     
     // MARK: - Public Methods
     func setSelectedColor(_ color: UIColor) {
+        let oldSelectedColor = selectedColor
         selectedColor = color
-        collectionView.reloadData()
+        
+        // Находим индексы старого и нового выбранного цвета
+        var indexPathsToUpdate: [IndexPath] = []
+        
+        if let oldIndex = Constants.colors.firstIndex(where: { $0 == oldSelectedColor }) {
+            indexPathsToUpdate.append(IndexPath(item: oldIndex, section: 0))
+        }
+        
+        if let newIndex = Constants.colors.firstIndex(where: { $0 == color }) {
+            indexPathsToUpdate.append(IndexPath(item: newIndex, section: 0))
+        }
+        
+        // Убираем дубликаты (если старый и новый цвет одинаковые)
+        indexPathsToUpdate = Array(Set(indexPathsToUpdate))
+        
+        // Если есть что обновлять - обновляем только нужные ячейки
+        if !indexPathsToUpdate.isEmpty {
+            collectionView.performBatchUpdates({
+                self.collectionView.reloadItems(at: indexPathsToUpdate)
+            })
+        }
     }
     
     func calculateHeight() -> CGFloat {
@@ -103,7 +124,12 @@ extension ColorSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ColorCell", for: indexPath) as! ColorCell
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "ColorCell",
+            for: indexPath
+        ) as? ColorCell else {
+            return UICollectionViewCell()
+        }
         let color = Constants.colors[indexPath.item]
         let isSelected = color == selectedColor
         cell.configure(with: color, isSelected: isSelected)
@@ -123,8 +149,19 @@ extension ColorSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let oldSelectedIndex = Constants.colors.firstIndex(where: { $0 == selectedColor })
         selectedColor = Constants.colors[indexPath.item]
-        collectionView.reloadData()
+        
+        // ЗАМЕНА: обновляем только старую и новую выбранную ячейку
+        var indexPathsToUpdate = [indexPath]
+        if let oldIndex = oldSelectedIndex, oldIndex != indexPath.item {
+            indexPathsToUpdate.append(IndexPath(item: oldIndex, section: 0))
+        }
+        
+        collectionView.performBatchUpdates({
+            self.collectionView.reloadItems(at: indexPathsToUpdate)
+        })
+        
         delegate?.didSelectColor(selectedColor)
     }
 }

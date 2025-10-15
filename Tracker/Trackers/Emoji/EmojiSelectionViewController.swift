@@ -121,7 +121,13 @@ extension EmojiSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EmojiCell", for: indexPath) as! EmojiCell
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "EmojiCell",
+            for: indexPath
+        ) as? EmojiCell else {
+            return UICollectionViewCell()
+        }
+        
         let emoji = Constants.emojis[indexPath.item]
         let isSelected = emoji == selectedEmoji
         cell.configure(with: emoji, isSelected: isSelected)

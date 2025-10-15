@@ -1,0 +1,25 @@
+# Xcode
+.DS_Store
+*.swp
+*.orig
+
+# Build generated
+build/
+DerivedData/
+
+# Swift Package Manager
+.swiftpm
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# App specific
+*.xcuserstate
+**/xcuserdata/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output

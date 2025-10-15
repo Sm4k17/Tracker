@@ -118,27 +118,25 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         daysCountLabel.text = "\(viewModel.completedDays) \(dayString(for: viewModel.completedDays))"
         
         let changes = {
+            // Общие свойства для всех состояний
+            self.plusButton.tintColor = .white
+            self.plusButton.alpha = 1.0
+            
             if viewModel.isFutureDate {
                 // ДЛЯ БУДУЩИХ ДНЕЙ - полупрозрачная и неактивная
                 self.plusButton.backgroundColor = viewModel.tracker.color.withAlphaComponent(0.3)
                 self.plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
-                self.plusButton.tintColor = .white
                 self.plusButton.isEnabled = false
-                self.plusButton.alpha = 1.0
             } else if viewModel.isCompletedToday {
                 // УЖЕ ВЫПОЛНЕН СЕГОДНЯ
                 self.plusButton.backgroundColor = viewModel.tracker.color.withAlphaComponent(0.3)
                 self.plusButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                self.plusButton.tintColor = .white
                 self.plusButton.isEnabled = true
-                self.plusButton.alpha = 1.0
             } else {
                 // ДОСТУПЕН ДЛЯ ВЫПОЛНЕНИЯ
                 self.plusButton.backgroundColor = viewModel.tracker.color
                 self.plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
-                self.plusButton.tintColor = .white
                 self.plusButton.isEnabled = true
-                self.plusButton.alpha = 1.0
             }
         }
         

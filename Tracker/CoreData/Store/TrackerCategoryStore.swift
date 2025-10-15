@@ -6,25 +6,32 @@
 //
 
 import CoreData
-import UIKit
+
+// MARK: - Constants
+private enum CoreDataKeys {
+    static let title = "title"
+}
 
 final class TrackerCategoryStore: NSObject {
     
+    // MARK: - Properties
     weak var delegate: TrackerCategoryStoreDelegate?
     
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
     
+    // MARK: - Initialization
     init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
         self.context = context
         super.init()
         setupFetchedResultsController()
     }
     
+    // MARK: - Setup
     private func setupFetchedResultsController() {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         request.sortDescriptors = [
-            NSSortDescriptor(key: "title", ascending: true)
+            NSSortDescriptor(key: CoreDataKeys.title, ascending: true)
         ]
         
         fetchedResultsController = NSFetchedResultsController(
@@ -49,7 +56,8 @@ final class TrackerCategoryStore: NSObject {
         return categoriesCoreData.compactMap { categoryCoreData -> TrackerCategory? in
             guard let title = categoryCoreData.title else { return nil }
             
-            let trackers = (categoryCoreData.trackers as? Set<TrackerCoreData>)?.compactMap { trackerCoreData -> Tracker? in
+            let trackersSet = categoryCoreData.trackers as? Set<TrackerCoreData> ?? Set()
+            let trackers = trackersSet.compactMap { trackerCoreData -> Tracker? in
                 guard let id = trackerCoreData.idTrackers,
                       let name = trackerCoreData.nameTrackers,
                       let emoji = trackerCoreData.emojiTrackers,
@@ -67,7 +75,7 @@ final class TrackerCategoryStore: NSObject {
                     scheduleTrackers: schedule,
                     category: title
                 )
-            } ?? []
+            }
             
             return TrackerCategory(title: title, trackers: trackers)
         }
@@ -87,7 +95,7 @@ final class TrackerCategoryStore: NSObject {
     
     func deleteCategory(title: String) throws {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "title == %@", title)
+        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
         
         if let categoryToDelete = try context.fetch(request).first {
             context.delete(categoryToDelete)
@@ -97,7 +105,7 @@ final class TrackerCategoryStore: NSObject {
     
     func fetchOrCreateCategory(title: String) -> TrackerCategoryCoreData {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "title == %@", title)
+        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
         
         if let existingCategory = try? context.fetch(request).first {
             return existingCategory
@@ -110,7 +118,7 @@ final class TrackerCategoryStore: NSObject {
     
     func isCategoryEmpty(title: String) -> Bool {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "title == %@", title)
+        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
         
         guard let category = try? context.fetch(request).first else { return true }
         return (category.trackers?.count ?? 0) == 0

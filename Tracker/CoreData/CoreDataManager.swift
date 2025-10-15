@@ -6,17 +6,16 @@
 //
 
 import CoreData
-import UIKit
 
 final class CoreDataManager {
     
+    // MARK: - Properties
     static let shared = CoreDataManager()
     private init() {}
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Tracker")
         
-        // ОДНО хранилище - ПРОСТО и РАБОЧЕ
         let storeDescription = NSPersistentStoreDescription()
         storeDescription.url = storeURL(for: "TrackerData")
         
@@ -34,15 +33,11 @@ final class CoreDataManager {
         return container
     }()
     
-    private func storeURL(for storeName: String) -> URL {
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return documentsDirectory.appendingPathComponent("\(storeName).sqlite")
-    }
-    
     var context: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
     
+    // MARK: - Public Methods
     func saveContext() {
         guard context.hasChanges else { return }
         do {
@@ -54,7 +49,22 @@ final class CoreDataManager {
     }
 }
 
-// Сброс базы
+// MARK: - Private Methods
+private extension CoreDataManager {
+    func storeURL(for storeName: String) -> URL {
+        guard let documentsDirectory = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first else {
+            print("⚠️ Using temporary directory as fallback")
+            return FileManager.default.temporaryDirectory.appendingPathComponent("\(storeName).sqlite")
+        }
+        
+        return documentsDirectory.appendingPathComponent("\(storeName).sqlite")
+    }
+}
+
+// MARK: - Database Reset
 extension CoreDataManager {
     static func resetDatabase() {
         let storeURL = shared.storeURL(for: "TrackerData")

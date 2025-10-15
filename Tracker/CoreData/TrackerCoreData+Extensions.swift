@@ -5,14 +5,15 @@
 //  Created by Рустам Ханахмедов on 14.10.2025.
 //
 
-import CoreData
 import UIKit
 
 extension TrackerCoreData {
     
     // MARK: - Color Handling
     func getColor() -> UIColor? {
-        guard let colorData = colorTrackers else { return nil }
+        guard let colorData = colorTrackers else {
+            return nil
+        }
         
         do {
             if let color = try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: colorData) {
@@ -34,7 +35,6 @@ extension TrackerCoreData {
     }
     
     // MARK: - Schedule Handling
-    
     func getSchedule() -> Set<Week> {
         guard let scheduleData = scheduleTrackers else { return [] }
         

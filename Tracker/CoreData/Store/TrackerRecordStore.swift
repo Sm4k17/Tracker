@@ -7,10 +7,19 @@
 
 import CoreData
 
+// MARK: - Constants
+private enum CoreDataKeys {
+    static let trackerId = "trackerId"
+    static let date = "date"
+    static let idTrackers = "idTrackers"
+}
+
 final class TrackerRecordStore {
     
+    // MARK: - Properties
     private let context: NSManagedObjectContext
     
+    // MARK: - Initialization
     init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
         self.context = context
     }
@@ -42,9 +51,11 @@ final class TrackerRecordStore {
         record.trackerId = trackerId
         record.date = date
         
-        // Находим трекер и связываем
         let trackerRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-        trackerRequest.predicate = NSPredicate(format: "idTrackers == %@", trackerId as CVarArg)
+        trackerRequest.predicate = NSPredicate(
+            format: "\(CoreDataKeys.idTrackers) == %@",
+            trackerId as CVarArg
+        )
         
         if let tracker = try context.fetch(trackerRequest).first {
             record.tracker = tracker
@@ -55,11 +66,21 @@ final class TrackerRecordStore {
     
     func removeRecord(trackerId: UUID, date: Date) throws {
         let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        guard let nextDay = Calendar.current.date(
+            byAdding: .day,
+            value: 1,
+            to: startOfDay
+        ) else {
+            return
+        }
+        
         request.predicate = NSPredicate(
-            format: "trackerId == %@ AND date >= %@ AND date < %@",
+            format: "\(CoreDataKeys.trackerId) == %@ AND \(CoreDataKeys.date) >= %@ AND \(CoreDataKeys.date) < %@",
             trackerId as CVarArg,
-            Calendar.current.startOfDay(for: date) as CVarArg,
-            Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: date))! as CVarArg
+            startOfDay as CVarArg,
+            nextDay as CVarArg
         )
         
         if let recordToDelete = try context.fetch(request).first {
@@ -70,11 +91,21 @@ final class TrackerRecordStore {
     
     func isTrackerCompleted(trackerId: UUID, date: Date) -> Bool {
         let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        guard let nextDay = Calendar.current.date(
+            byAdding: .day,
+            value: 1,
+            to: startOfDay
+        ) else {
+            return false
+        }
+        
         request.predicate = NSPredicate(
-            format: "trackerId == %@ AND date >= %@ AND date < %@",
+            format: "\(CoreDataKeys.trackerId) == %@ AND \(CoreDataKeys.date) >= %@ AND \(CoreDataKeys.date) < %@",
             trackerId as CVarArg,
-            Calendar.current.startOfDay(for: date) as CVarArg,
-            Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: date))! as CVarArg
+            startOfDay as CVarArg,
+            nextDay as CVarArg
         )
         
         do {
@@ -88,7 +119,10 @@ final class TrackerRecordStore {
     
     func completedDaysCount(for trackerId: UUID) -> Int {
         let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "trackerId == %@", trackerId as CVarArg)
+        request.predicate = NSPredicate(
+            format: "\(CoreDataKeys.trackerId) == %@",
+            trackerId as CVarArg
+        )
         
         do {
             return try context.count(for: request)

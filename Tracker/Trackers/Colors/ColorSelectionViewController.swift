@@ -124,7 +124,12 @@ extension ColorSelectionView: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ColorCell", for: indexPath) as! ColorCell
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "ColorCell",
+            for: indexPath
+        ) as? ColorCell else {
+            return UICollectionViewCell()
+        }
         let color = Constants.colors[indexPath.item]
         let isSelected = color == selectedColor
         cell.configure(with: color, isSelected: isSelected)

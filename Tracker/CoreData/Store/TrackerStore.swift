@@ -6,33 +6,42 @@
 //
 
 import CoreData
-import UIKit
+
+// MARK: - Constants
+private enum CoreDataKeys {
+    static let idTrackers = "idTrackers"
+    static let nameTrackers = "nameTrackers"
+    static let trackerCategoryTitle = "trackerCategory.title"
+}
 
 final class TrackerStore: NSObject {
     
+    // MARK: - Properties
     weak var delegate: TrackerStoreDelegate?
     
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
     private let categoryStore = TrackerCategoryStore()
     
+    // MARK: - Initialization
     init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
         self.context = context
         super.init()
         setupFetchedResultsController()
     }
     
+    // MARK: - Setup
     private func setupFetchedResultsController() {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         request.sortDescriptors = [
-            NSSortDescriptor(key: "trackerCategory.title", ascending: true),
-            NSSortDescriptor(key: "nameTrackers", ascending: true)
+            NSSortDescriptor(key: CoreDataKeys.trackerCategoryTitle, ascending: true),
+            NSSortDescriptor(key: CoreDataKeys.nameTrackers, ascending: true)
         ]
         
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: request,
             managedObjectContext: context,
-            sectionNameKeyPath: "trackerCategory.title",
+            sectionNameKeyPath: CoreDataKeys.trackerCategoryTitle,
             cacheName: nil
         )
         fetchedResultsController.delegate = self
@@ -88,7 +97,6 @@ final class TrackerStore: NSObject {
         trackerCoreData.setColor(tracker.color)
         trackerCoreData.setSchedule(tracker.scheduleTrackers)
         
-        // Используем CategoryStore для работы с категориями
         let category = categoryStore.fetchOrCreateCategory(title: categoryTitle)
         trackerCoreData.trackerCategory = category
         
@@ -97,7 +105,10 @@ final class TrackerStore: NSObject {
     
     func deleteTracker(_ tracker: Tracker) throws {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "idTrackers == %@", tracker.idTrackers as CVarArg)
+        request.predicate = NSPredicate(
+            format: "\(CoreDataKeys.idTrackers) == %@",
+            tracker.idTrackers as CVarArg
+        )
         
         if let trackerToDelete = try context.fetch(request).first {
             context.delete(trackerToDelete)
@@ -107,7 +118,10 @@ final class TrackerStore: NSObject {
     
     func fetchTracker(by id: UUID) -> Tracker? {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "idTrackers == %@", id as CVarArg)
+        request.predicate = NSPredicate(
+            format: "\(CoreDataKeys.idTrackers) == %@",
+            id as CVarArg
+        )
         
         guard let trackerCoreData = try? context.fetch(request).first,
               let trackerId = trackerCoreData.idTrackers,

@@ -105,6 +105,7 @@ final class CategorySelectionViewController: UIViewController {
     private let selectedCategory: String
     private let onCategorySelected: (String) -> Void
     private var categories: [String] = []
+    private let categoryStore = TrackerCategoryStore()
     
     // MARK: - Initializer
     init(selectedCategory: String, onCategorySelected: @escaping (String) -> Void) {
@@ -122,9 +123,8 @@ final class CategorySelectionViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
+        loadCategories()
         updateUIState()
-        // ВРЕМЕННО: добавляем тестовые категории
-        categories = ["Важное", "Работа", "Личное"]
     }
     
     // MARK: - Setup
@@ -178,15 +178,26 @@ final class CategorySelectionViewController: UIViewController {
         tableView.isHidden = isEmpty
     }
     
+    // MARK: - Data Management
+    private func loadCategories() {
+        categories = categoryStore.fetchCategoryTitles()
+    }
+    
     // MARK: - Actions
     private func didTapAddCategoryButton() {
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
-            self?.categories.append(newCategory)
-            self?.updateUIState()
+            guard let self = self else { return }
             
-            // ЗАМЕНА: вместо reloadData используем вставку новой строки
-            let newIndexPath = IndexPath(row: (self?.categories.count ?? 1) - 1, section: 0)
-            self?.tableView.insertRows(at: [newIndexPath], with: .automatic)
+            do {
+                try self.categoryStore.createCategory(title: newCategory)
+                self.loadCategories()
+                self.updateUIState()
+                
+                let newIndexPath = IndexPath(row: self.categories.count - 1, section: 0)
+                self.tableView.insertRows(at: [newIndexPath], with: .automatic)
+            } catch {
+                print("❌ Error creating category: \(error)")
+            }
         }
         navigationController?.pushViewController(addCategoryVC, animated: true)
     }

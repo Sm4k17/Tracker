@@ -207,8 +207,6 @@ final class EventConfigurationViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         setupTapGesture()
-        selectedCategory = "Важное"
-        updateCategoryButtonSubtitle(selectedCategory)
         updateCreateButtonState()
     }
     
@@ -452,15 +450,12 @@ final class EventConfigurationViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapCategoryButton() {
-        // ВРЕМЕННО
-        /*
          let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
          self?.selectedCategory = category
          self?.updateCategoryButtonSubtitle(category)
          self?.updateCreateButtonState()
          }
          navigationController?.pushViewController(categoryVC, animated: true)
-         */
     }
     
     private func didTapCancelButton() {

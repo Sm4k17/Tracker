@@ -38,6 +38,7 @@
 		F1B10CA22EA521AD007C4747 /* OnboardingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B10CA12EA521AD007C4747 /* OnboardingPageViewController.swift */; };
 		F1B10CA52EA5220E007C4747 /* OnboardingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B10CA42EA5220E007C4747 /* OnboardingPage.swift */; };
 		F1B10CA72EA52220007C4747 /* OnboardingStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B10CA62EA52220007C4747 /* OnboardingStorage.swift */; };
+		F1B10CA92EA5B27D007C4747 /* CategoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B10CA82EA5B27D007C4747 /* CategoryViewModel.swift */; };
 		F1ED868B2E7854070082B276 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86832E7854070082B276 /* AppDelegate.swift */; };
 		F1ED868C2E7854070082B276 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86882E7854070082B276 /* SceneDelegate.swift */; };
 		F1ED868D2E7854070082B276 /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ED86892E7854070082B276 /* TrackersViewController.swift */; };
@@ -79,6 +80,7 @@
 		F1B10CA12EA521AD007C4747 /* OnboardingPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPageViewController.swift; sourceTree = "<group>"; };
 		F1B10CA42EA5220E007C4747 /* OnboardingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage.swift; sourceTree = "<group>"; };
 		F1B10CA62EA52220007C4747 /* OnboardingStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStorage.swift; sourceTree = "<group>"; };
+		F1B10CA82EA5B27D007C4747 /* CategoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewModel.swift; sourceTree = "<group>"; };
 		F1ED86522E6EF3840082B276 /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1ED86832E7854070082B276 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F1ED86842E7854070082B276 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 			children = (
 				F1358F262E8C35420095CC3E /* CategorySelectionViewController.swift */,
 				F1358F2B2E8C361D0095CC3E /* AddCategoryViewController.swift */,
+				F1B10CA82EA5B27D007C4747 /* CategoryViewModel.swift */,
 			);
 			path = Category;
 			sourceTree = "<group>";
@@ -390,6 +393,7 @@
 				F1358F122E8C23D70095CC3E /* TrackerRecord.swift in Sources */,
 				F1358F0A2E8C1B190095CC3E /* CreationTrackerDelegate.swift in Sources */,
 				F1ED868D2E7854070082B276 /* TrackersViewController.swift in Sources */,
+				F1B10CA92EA5B27D007C4747 /* CategoryViewModel.swift in Sources */,
 				F1B10CA22EA521AD007C4747 /* OnboardingPageViewController.swift in Sources */,
 				F1A4AA0B2E9DA66E0093A8E4 /* CoreDataManager.swift in Sources */,
 				F1358F2C2E8C361D0095CC3E /* AddCategoryViewController.swift in Sources */,

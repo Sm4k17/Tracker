@@ -102,14 +102,15 @@ final class CategorySelectionViewController: UIViewController {
     }()
     
     // MARK: - Properties
+    private let viewModel: CategoryViewModel
     private let selectedCategory: String
     private let onCategorySelected: (String) -> Void
-    private var categories: [String] = []
     
     // MARK: - Initializer
     init(selectedCategory: String, onCategorySelected: @escaping (String) -> Void) {
         self.selectedCategory = selectedCategory
         self.onCategorySelected = onCategorySelected
+        self.viewModel = CategoryViewModel()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -122,9 +123,8 @@ final class CategorySelectionViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
-        updateUIState()
-        // ВРЕМЕННО: добавляем тестовые категории
-        categories = ["Важное", "Работа", "Личное"]
+        setupBindings()
+        viewModel.loadCategories()
     }
     
     // MARK: - Setup
@@ -157,7 +157,6 @@ final class CategorySelectionViewController: UIViewController {
             
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            // ИЗМЕНЕНИЕ: убираем top отступ, чтобы таблица начиналась сразу под navigation bar
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: addCategoryButton.topAnchor, constant: -Constants.tableBottomOffset),
             
@@ -171,9 +170,31 @@ final class CategorySelectionViewController: UIViewController {
         ])
     }
     
+    // MARK: - Bindings (MVVM)
+    private func setupBindings() {
+        viewModel.categoriesDidUpdate = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateUIState()
+            }
+        }
+        
+        viewModel.onCategoryAdded = { [weak self] indexPath in
+            DispatchQueue.main.async {
+                self?.updateUIState()
+                self?.tableView.insertRows(at: [indexPath], with: .automatic) // Плавное добавление
+            }
+        }
+        
+        viewModel.onError = { [weak self] errorMessage in
+            DispatchQueue.main.async {
+                self?.showError(errorMessage)
+            }
+        }
+    }
+    
     // MARK: - UI State Management
     private func updateUIState() {
-        let isEmpty = categories.isEmpty
+        let isEmpty = viewModel.isEmpty
         placeholderStackView.isHidden = !isEmpty
         tableView.isHidden = isEmpty
     }
@@ -181,26 +202,27 @@ final class CategorySelectionViewController: UIViewController {
     // MARK: - Actions
     private func didTapAddCategoryButton() {
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
-            self?.categories.append(newCategory)
-            self?.updateUIState()
-            
-            // ЗАМЕНА: вместо reloadData используем вставку новой строки
-            let newIndexPath = IndexPath(row: (self?.categories.count ?? 1) - 1, section: 0)
-            self?.tableView.insertRows(at: [newIndexPath], with: .automatic)
+            self?.viewModel.createCategory(title: newCategory)
         }
         navigationController?.pushViewController(addCategoryVC, animated: true)
+    }
+    
+    private func showError(_ message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 
 // MARK: - UITableViewDataSource
 extension CategorySelectionViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        return viewModel.categories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        let category = categories[indexPath.row]
+        let category = viewModel.categories[indexPath.row]
         
         // Конфигурация ячейки
         cell.textLabel?.text = category
@@ -210,7 +232,7 @@ extension CategorySelectionViewController: UITableViewDataSource {
         cell.selectionStyle = .none
         
         // Галочка для выбранной категории
-        if category == selectedCategory {
+        if viewModel.isCategorySelected(category, comparedTo: selectedCategory) {
             cell.accessoryType = .checkmark
             cell.tintColor = .ypBlue
         } else {
@@ -228,7 +250,7 @@ extension CategorySelectionViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return Constants.tableTopInset // 24
+        return Constants.tableTopInset
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -236,7 +258,7 @@ extension CategorySelectionViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedCategory = categories[indexPath.row]
+        let selectedCategory = viewModel.selectCategory(at: indexPath.row)
         onCategorySelected(selectedCategory)
         navigationController?.popViewController(animated: true)
     }

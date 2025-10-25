@@ -32,9 +32,9 @@ final class OnboardingViewController: UIPageViewController {
             var titleText: String {
                 switch self {
                 case .blue:
-                    return "Отслеживайте только то, что хотите"
+                    return "track_only_what_you_want".localized
                 case .red:
-                    return "Даже если это\nне литры воды и йога"
+                    return "even_if_not_water_and_yoga".localized
                 }
             }
             

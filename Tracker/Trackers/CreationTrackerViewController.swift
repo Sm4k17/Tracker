@@ -12,9 +12,9 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Создание трекера"
-        static let regularTracker = "Привычка"
-        static let irregularTracker = "Нерегулярное событие"
+        static let navigationTitle = "trackers".localized
+        static let regularTracker = "regular_tracker".localized
+        static let irregularTracker = "irregular_tracker".localized
         
         // Константы для размеров и отступов
         enum Layout {

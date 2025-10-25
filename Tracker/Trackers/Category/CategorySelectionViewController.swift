@@ -12,9 +12,9 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Категория"
-        static let addCategoryButtonTitle = "Добавить категорию"
-        static let placeholderTitle = "Привычки и события можно\nобъединить по смыслу"
+        static let navigationTitle = "category".localized
+        static let addCategoryButtonTitle = "add_category".localized
+        static let placeholderTitle = "what_to_track".localized
         static let placeholderImageName = "icDizzy"
         
         static let buttonHorizontalInset: CGFloat = 20

@@ -12,16 +12,16 @@ final class EventConfigurationViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Новое нерегулярное событие"
-        static let cancelButtonTitle = "Отмена"
-        static let createButtonTitle = "Создать"
+        static let navigationTitle = "irregular_event".localized
+        static let cancelButtonTitle = "cancel".localized
+        static let createButtonTitle = "create".localized
         
-        static let namePlaceholder = "Введите название трекера"
-        static let categoryTitle = "Категория"
+        static let namePlaceholder = "enter_tracker_name".localized
+        static let categoryTitle = "category".localized
         static let categorySubtitle = ""
-        static let emojiTitle = "Emoji"
-        static let colorTitle = "Цвет"
-        static let symbolsLimitMessage = "Ограничение 38 символов"
+        static let emojiTitle = "emoji".localized
+        static let colorTitle = "color".localized
+        static let symbolsLimitMessage = "symbols_limit".localized
         static let symbolsLimit = 38
         
         // Константы для размеров и отступов

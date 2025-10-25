@@ -1,0 +1,72 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Рустам Ханахмедов on 25.10.2025.
+  
+*/
+
+// Localizable.strings (Russian - Base)
+
+// Common
+"cancel" = "Отмена"; 
+"create" = "Создать";
+"ready" = "Готово";
+"add" = "Добавить";
+"delete" = "Удалить";
+"edit" = "Редактировать";
+"save" = "Сохранить";
+
+// Navigation Titles
+"trackers" = "Трекеры";
+"stats" = "Статистика";
+"new_habit" = "Новая привычка";
+"irregular_event" = "Нерегулярное событие";
+"category" = "Категория";
+"schedule" = "Расписание";
+"new_category" = "Новая категория";
+
+// Placeholders
+"enter_tracker_name" = "Введите название трекера";
+"enter_category_name" = "Введите название категории";
+"search" = "Поиск";
+"what_to_track" = "Что будем отслеживать?";
+
+// Buttons
+"add_category" = "Добавить категорию";
+"regular_tracker" = "Привычка";
+"irregular_tracker" = "Нерегулярное событие";
+
+// Sections
+"emoji" = "Emoji";
+"color" = "Цвет";
+
+// Messages
+"symbols_limit" = "Ограничение 38 символов";
+"track_only_what_you_want" = "Отслеживайте только то, что хотите";
+"even_if_not_water_and_yoga" = "Даже если это\nне литры воды и йога";
+"cool_technologies" = "Вот это технологии!";
+
+// Days
+"monday" = "Понедельник";
+"tuesday" = "Вторник";
+"wednesday" = "Среда";
+"thursday" = "Четверг";
+"friday" = "Пятница";
+"saturday" = "Суббота";
+"sunday" = "Воскресенье";
+"every_day" = "Каждый день";
+
+// Days short
+"mon" = "Пн";
+"tue" = "Вт";
+"wed" = "Ср";
+"thu" = "Чт";
+"fri" = "Пт";
+"sat" = "Сб";
+"sun" = "Вс";
+
+// Days count
+"day" = "день";
+"days" = "дня";
+"days_many" = "дней";

@@ -12,8 +12,8 @@ final class ScheduleSelectionViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Расписание"
-        static let readyButtonTitle = "Готово"
+        static let navigationTitle = "schedule".localized
+        static let readyButtonTitle = "ready".localized
         
         enum Layout {
             static let horizontalInset: CGFloat = 16
@@ -159,7 +159,7 @@ final class ScheduleSelectionViewController: UIViewController {
     
     private func createDayLabel(for day: Week) -> UILabel {
         let label = UILabel()
-        label.text = day.title
+        label.text = day.localizedTitle
         label.font = Constants.Fonts.dayLabel
         label.textColor = Constants.Colors.dayLabel
         return label

@@ -12,11 +12,17 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Трекеры"
-        static let placeholderTitle = "Что будем отслеживать?"
+        static let navigationTitle = NSLocalizedString(
+            "trackers",
+            comment: "Main screen title for trackers list"
+        )
+        static let placeholderTitle = NSLocalizedString(
+            "what_to_track",
+            comment: "Placeholder text when no trackers available"
+        )
         static let placeholderImageName = "icDizzy"
         static let addButtonImageName = "plus"
-        static let searchPlaceholder = "Поиск"
+        static let searchPlaceholder = "search".localized
         
         // Константы для размеров и отступов
         enum Layout {
@@ -366,15 +372,6 @@ final class TrackersViewController: UIViewController {
     
     private func completedDaysCount(for trackerId: UUID) -> Int {
         completedTrackers.filter { $0.trackerId == trackerId }.count
-    }
-    
-    private func dayString(for count: Int) -> String {
-        let lastDigit = count % 10
-        let lastTwoDigits = count % 100
-        
-        if lastDigit == 1 && lastTwoDigits != 11 { return "день" }
-        if (2...4).contains(lastDigit) && !(12...14).contains(lastTwoDigits) { return "дня" }
-        return "дней"
     }
     
     private func setupTapGesture() {

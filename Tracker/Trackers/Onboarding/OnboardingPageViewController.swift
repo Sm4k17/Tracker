@@ -44,7 +44,11 @@ final class OnboardingPageViewController: UIViewController {
     
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        let buttonTitle = NSLocalizedString(
+            "cool_technologies",
+            comment: "Action button title on onboarding screen"
+        )
+        button.setTitle(buttonTitle, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
@@ -101,19 +105,19 @@ final class OnboardingPageViewController: UIViewController {
             
             // Title Label
             titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                                               constant: Constants.horizontalPadding),
+                                                constant: Constants.horizontalPadding),
             titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                                                constant: -Constants.horizontalPadding),
+                                                 constant: -Constants.horizontalPadding),
             titleLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                              constant: -Constants.bottomOffset),
+                                               constant: -Constants.bottomOffset),
             
             // Action Button
             actionButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                                                 constant: Constants.horizontalInset),
+                                                  constant: Constants.horizontalInset),
             actionButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                                                  constant: -Constants.horizontalInset),
+                                                   constant: -Constants.horizontalInset),
             actionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                                constant: -Constants.bottomButtonOffset),
+                                                 constant: -Constants.bottomButtonOffset),
             actionButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight)
         ])
     }

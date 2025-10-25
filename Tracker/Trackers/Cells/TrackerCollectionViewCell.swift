@@ -155,8 +155,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let lastDigit = count % 10
         let lastTwoDigits = count % 100
         
-        if lastDigit == 1 && lastTwoDigits != 11 { return "день" }
-        if (2...4).contains(lastDigit) && !(12...14).contains(lastTwoDigits) { return "дня" }
-        return "дней"
+        if lastDigit == 1 && lastTwoDigits != 11 { return "day".localized }
+        if (2...4).contains(lastDigit) && !(12...14).contains(lastTwoDigits) { return "days".localized }
+        return "days_many".localized
     }
 }

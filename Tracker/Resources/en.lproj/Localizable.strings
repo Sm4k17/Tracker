@@ -1,0 +1,72 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Рустам Ханахмедов on 25.10.2025.
+  
+*/
+
+// Localizable.strings (English)
+
+// Common
+"cancel" = "Cancel";
+"create" = "Create";
+"ready" = "Ready";
+"add" = "Add";
+"delete" = "Delete";
+"edit" = "Edit";
+"save" = "Save";
+
+// Navigation Titles
+"trackers" = "Trackers";
+"stats" = "Statistics";
+"new_habit" = "New Habit";
+"irregular_event" = "Irregular Event";
+"category" = "Category";
+"schedule" = "Schedule";
+"new_category" = "New Category";
+
+// Placeholders
+"enter_tracker_name" = "Enter tracker name";
+"enter_category_name" = "Enter category name";
+"search" = "Search";
+"what_to_track" = "What shall we track?";
+
+// Buttons
+"add_category" = "Add Category";
+"regular_tracker" = "Habit";
+"irregular_tracker" = "Irregular Event";
+
+// Sections
+"emoji" = "Emoji";
+"color" = "Color";
+
+// Messages
+"symbols_limit" = "38 character limit";
+"track_only_what_you_want" = "Track only what you want";
+"even_if_not_water_and_yoga" = "Even if it's not\nliters of water and yoga";
+"cool_technologies" = "That's some cool technology!";
+
+// Days
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+"every_day" = "Every day";
+
+// Days short
+"mon" = "Mon";
+"tue" = "Tue";
+"wed" = "Wed";
+"thu" = "Thu";
+"fri" = "Fri";
+"sat" = "Sat";
+"sun" = "Sun";
+
+// Days count
+"day" = "day";
+"days" = "days";
+"days_many" = "days";

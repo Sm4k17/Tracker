@@ -12,18 +12,24 @@ final class HabitConfigurationViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Новая привычка"
-        static let cancelButtonTitle = "Отмена"
-        static let createButtonTitle = "Создать"
+        static let navigationTitle = NSLocalizedString(
+            "new_habit",
+            comment: "Screen title for creating new habit tracker"
+        )
+        static let cancelButtonTitle = "cancel".localized
+        static let createButtonTitle = "create".localized
         
-        static let namePlaceholder = "Введите название трекера"
-        static let categoryTitle = "Категория"
+        static let namePlaceholder = NSLocalizedString(
+            "enter_tracker_name",
+            comment: "Text field placeholder for tracker name input"
+        )
+        static let categoryTitle = "category".localized
         static let categorySubtitle = ""
-        static let scheduleTitle = "Расписание"
+        static let scheduleTitle = "schedule".localized
         static let scheduleSubtitle = ""
-        static let emojiTitle = "Emoji"
-        static let colorTitle = "Цвет"
-        static let symbolsLimitMessage = "Ограничение 38 символов"
+        static let emojiTitle = "emoji".localized
+        static let colorTitle = "color".localized
+        static let symbolsLimitMessage = "symbols_limit".localized
         static let symbolsLimit = 38
         
         // Константы для размеров и отступов
@@ -496,12 +502,12 @@ final class HabitConfigurationViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapCategoryButton() {
-         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
-         self?.selectedCategory = category
-         self?.updateCategoryButtonSubtitle(category)
-         self?.updateCreateButtonState()
-         }
-         navigationController?.pushViewController(categoryVC, animated: true)
+        let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
+            self?.selectedCategory = category
+            self?.updateCategoryButtonSubtitle(category)
+            self?.updateCreateButtonState()
+        }
+        navigationController?.pushViewController(categoryVC, animated: true)
     }
     
     private func didTapScheduleButton() {
@@ -512,10 +518,10 @@ final class HabitConfigurationViewController: UIViewController {
             if schedule.isEmpty {
                 scheduleText = ""
             } else if schedule.count == 7 {
-                scheduleText = "Каждый день"
+                scheduleText = "every_day".localized
             } else {
                 let sortedDays = schedule.sorted { $0.rawValue < $1.rawValue }
-                scheduleText = sortedDays.map { $0.shortTitle }.joined(separator: ", ")
+                scheduleText = sortedDays.map { $0.localizedShortTitle }.joined(separator: ", ")
             }
             
             self?.updateScheduleButtonSubtitle(scheduleText)

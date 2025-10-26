@@ -67,6 +67,4 @@
 "sun" = "Sun";
 
 // Days count
-"day" = "day";
-"days" = "days";
-"days_many" = "days";
+"days_count" = "%d days";

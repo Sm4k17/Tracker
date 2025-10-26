@@ -107,7 +107,7 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
-        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.locale = Locale.current
         datePicker.tintColor = .ypBlack
         
         datePicker.addAction(UIAction { [weak self] _ in
@@ -218,8 +218,9 @@ final class TrackersViewController: UIViewController {
     // MARK: - Date Formatter
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yy"
-        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.locale = Locale.current
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
         return formatter
     }()
     

@@ -67,6 +67,4 @@
 "sun" = "Вс";
 
 // Days count
-"day" = "день";
-"days" = "дня";
-"days_many" = "дней";
+"days_count" = "%d дней"; // Будет переопределено stringsdict

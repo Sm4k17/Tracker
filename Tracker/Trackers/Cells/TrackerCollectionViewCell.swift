@@ -115,7 +115,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         emojiLabel.text = viewModel.tracker.emoji
         cardView.backgroundColor = viewModel.tracker.color
         
-        daysCountLabel.text = "\(viewModel.completedDays) \(dayString(for: viewModel.completedDays))"
+        daysCountLabel.text = dayString(for: viewModel.completedDays)
         
         let changes = {
             // Общие свойства для всех состояний
@@ -152,11 +152,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func dayString(for count: Int) -> String {
-        let lastDigit = count % 10
-        let lastTwoDigits = count % 100
-        
-        if lastDigit == 1 && lastTwoDigits != 11 { return "day".localized }
-        if (2...4).contains(lastDigit) && !(12...14).contains(lastTwoDigits) { return "days".localized }
-        return "days_many".localized
+        let format = NSLocalizedString("days_count", comment: "Number of days completed")
+        return String.localizedStringWithFormat(format, count)
     }
 }

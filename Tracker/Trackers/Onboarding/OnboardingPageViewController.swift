@@ -25,7 +25,7 @@ final class OnboardingPageViewController: UIViewController {
     // MARK: - UI Components
     private lazy var backgroundImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: page.imageName)
+        imageView.image = page.image
         imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -44,11 +44,7 @@ final class OnboardingPageViewController: UIViewController {
     
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        let buttonTitle = NSLocalizedString(
-            "cool_technologies",
-            comment: "Action button title on onboarding screen"
-        )
-        button.setTitle(buttonTitle, for: .normal)
+        button.setTitle(R.string.localizable.cool_technologies(), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack

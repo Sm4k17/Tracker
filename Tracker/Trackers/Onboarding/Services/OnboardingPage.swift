@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Onboarding Page Model
 struct OnboardingPage {
-    let imageName: String
+    let image: UIImage?
     let titleText: String
     let index: Int
     let total: Int

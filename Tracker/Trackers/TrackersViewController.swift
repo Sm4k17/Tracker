@@ -12,17 +12,9 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = NSLocalizedString(
-            "trackers",
-            comment: "Main screen title for trackers list"
-        )
-        static let placeholderTitle = NSLocalizedString(
-            "what_to_track",
-            comment: "Placeholder text when no trackers available"
-        )
-        static let placeholderImageName = "icDizzy"
-        static let addButtonImageName = "plus"
-        static let searchPlaceholder = "search".localized
+        static let navigationTitle = R.string.localizable.trackers()
+        static let placeholderTitle = R.string.localizable.what_to_track()
+        static let searchPlaceholder = R.string.localizable.search()
         
         // Константы для размеров и отступов
         enum Layout {
@@ -91,7 +83,7 @@ final class TrackersViewController: UIViewController {
     
     // Кнопка "+" в левой части navigation bar
     private lazy var addButton: UIBarButtonItem = {
-        let buttonImage = UIImage(named: Constants.addButtonImageName) ?? UIImage(systemName: "plus")
+        let buttonImage = R.image.plus()
         let button = UIBarButtonItem(
             image: buttonImage,
             primaryAction: UIAction { [weak self] _ in
@@ -142,7 +134,7 @@ final class TrackersViewController: UIViewController {
     private lazy var placeholderImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(named: Constants.placeholderImageName)
+        imageView.image = R.image.icDizzy()
         return imageView
     }()
     

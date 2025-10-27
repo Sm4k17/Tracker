@@ -20,27 +20,27 @@ final class OnboardingViewController: UIPageViewController {
             case blue
             case red
             
-            var imageName: String {
+            var image: UIImage? {
                 switch self {
                 case .blue:
-                    return "onboardingBlue"
+                    return R.image.onboardingBlue()
                 case .red:
-                    return "onboardingRed"
+                    return R.image.onboardingRed()
                 }
             }
             
             var titleText: String {
                 switch self {
                 case .blue:
-                    return "track_only_what_you_want".localized
+                    return R.string.localizable.track_only_what_you_want()
                 case .red:
-                    return "even_if_not_water_and_yoga".localized
+                    return R.string.localizable.even_if_not_water_and_yoga()
                 }
             }
             
             var page: OnboardingPage {
                 return OnboardingPage(
-                    imageName: imageName,
+                    image: image,
                     titleText: titleText,
                     index: rawValue,
                     total: OnboardingStep.allCases.count

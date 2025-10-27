@@ -22,8 +22,8 @@ private enum TabBarConstants {
     }
     
     enum Titles {
-        static let trackers = "Трекеры"
-        static let stats = "Статистика"
+        static let trackers = R.string.localizable.trackers()
+        static let stats = R.string.localizable.stats()
     }
 }
 

@@ -18,25 +18,25 @@ enum Week: Int, CaseIterable {
     
     var localizedTitle: String {
         switch self {
-        case .monday: return "monday".localized
-        case .tuesday: return "tuesday".localized
-        case .wednesday: return "wednesday".localized
-        case .thursday: return "thursday".localized
-        case .friday: return "friday".localized
-        case .saturday: return "saturday".localized
-        case .sunday: return "sunday".localized
+        case .monday: return R.string.localizable.monday()
+        case .tuesday: return R.string.localizable.tuesday()
+        case .wednesday: return R.string.localizable.wednesday()
+        case .thursday: return R.string.localizable.thursday()
+        case .friday: return R.string.localizable.friday()
+        case .saturday: return R.string.localizable.saturday()
+        case .sunday: return R.string.localizable.sunday()
         }
     }
     
     var localizedShortTitle: String {
         switch self {
-        case .monday: return "mon".localized
-        case .tuesday: return "tue".localized
-        case .wednesday: return "wed".localized
-        case .thursday: return "thu".localized
-        case .friday: return "fri".localized
-        case .saturday: return "sat".localized
-        case .sunday: return "sun".localized
+        case .monday: return R.string.localizable.mon()
+        case .tuesday: return R.string.localizable.tue()
+        case .wednesday: return R.string.localizable.wed()
+        case .thursday: return R.string.localizable.thu()
+        case .friday: return R.string.localizable.fri()
+        case .saturday: return R.string.localizable.sat()
+        case .sunday: return R.string.localizable.sun()
         }
     }
 }

@@ -12,8 +12,8 @@ final class ScheduleSelectionViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "schedule".localized
-        static let readyButtonTitle = "ready".localized
+        static let navigationTitle = R.string.localizable.schedule()
+        static let readyButtonTitle = R.string.localizable.ready()
         
         enum Layout {
             static let horizontalInset: CGFloat = 16

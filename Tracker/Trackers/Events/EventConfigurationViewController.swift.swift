@@ -12,16 +12,16 @@ final class EventConfigurationViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "irregular_event".localized
-        static let cancelButtonTitle = "cancel".localized
-        static let createButtonTitle = "create".localized
+        static let navigationTitle = R.string.localizable.irregular_event()
+        static let cancelButtonTitle = R.string.localizable.cancel()
+        static let createButtonTitle = R.string.localizable.create()
         
-        static let namePlaceholder = "enter_tracker_name".localized
-        static let categoryTitle = "category".localized
+        static let namePlaceholder = R.string.localizable.enter_tracker_name()
+        static let categoryTitle = R.string.localizable.category()
         static let categorySubtitle = ""
-        static let emojiTitle = "emoji".localized
-        static let colorTitle = "color".localized
-        static let symbolsLimitMessage = "symbols_limit".localized
+        static let emojiTitle = R.string.localizable.emoji()
+        static let colorTitle = R.string.localizable.color()
+        static let symbolsLimitMessage = R.string.localizable.symbols_limit()
         static let symbolsLimit = 38
         
         // Константы для размеров и отступов
@@ -389,7 +389,7 @@ final class EventConfigurationViewController: UIViewController {
         
         // Добавляем стрелочку
         let arrowImageView = UIImageView()
-        arrowImageView.image = UIImage(named: "chevron")
+        arrowImageView.image = R.image.chevron()
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         

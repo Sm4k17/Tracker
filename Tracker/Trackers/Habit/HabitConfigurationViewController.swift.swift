@@ -12,24 +12,18 @@ final class HabitConfigurationViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = NSLocalizedString(
-            "new_habit",
-            comment: "Screen title for creating new habit tracker"
-        )
-        static let cancelButtonTitle = "cancel".localized
-        static let createButtonTitle = "create".localized
+        static let navigationTitle = R.string.localizable.new_habit()
+        static let cancelButtonTitle = R.string.localizable.cancel()
+        static let createButtonTitle = R.string.localizable.create()
         
-        static let namePlaceholder = NSLocalizedString(
-            "enter_tracker_name",
-            comment: "Text field placeholder for tracker name input"
-        )
-        static let categoryTitle = "category".localized
+        static let namePlaceholder = R.string.localizable.enter_tracker_name()
+        static let categoryTitle = R.string.localizable.category()
         static let categorySubtitle = ""
-        static let scheduleTitle = "schedule".localized
+        static let scheduleTitle = R.string.localizable.schedule()
         static let scheduleSubtitle = ""
-        static let emojiTitle = "emoji".localized
-        static let colorTitle = "color".localized
-        static let symbolsLimitMessage = "symbols_limit".localized
+        static let emojiTitle = R.string.localizable.emoji()
+        static let colorTitle = R.string.localizable.color()
+        static let symbolsLimitMessage = R.string.localizable.symbols_limit()
         static let symbolsLimit = 38
         
         // Константы для размеров и отступов
@@ -365,7 +359,7 @@ final class HabitConfigurationViewController: UIViewController {
         button.addSubview(textStack)
         
         let arrowImageView = UIImageView()
-        arrowImageView.image = UIImage(named: "chevron")
+        arrowImageView.image = R.image.chevron()
         arrowImageView.tintColor = .ypGray
         button.addSubview(arrowImageView)
         
@@ -518,7 +512,7 @@ final class HabitConfigurationViewController: UIViewController {
             if schedule.isEmpty {
                 scheduleText = ""
             } else if schedule.count == 7 {
-                scheduleText = "every_day".localized
+                scheduleText = R.string.localizable.every_day()
             } else {
                 let sortedDays = schedule.sorted { $0.rawValue < $1.rawValue }
                 scheduleText = sortedDays.map { $0.localizedShortTitle }.joined(separator: ", ")

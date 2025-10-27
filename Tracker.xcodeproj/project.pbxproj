@@ -26,9 +26,10 @@
 		F1358F302E8C597E0095CC3E /* ColorSelectionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F2F2E8C597E0095CC3E /* ColorSelectionDelegate.swift */; };
 		F1358F322E9030F00095CC3E /* TrackerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F312E9030F00095CC3E /* TrackerCollectionViewCell.swift */; };
 		F1358F342E9031730095CC3E /* SupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1358F332E9031730095CC3E /* SupplementaryView.swift */; };
-		F15A76732EAD207100DDAEDB /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = F15A76722EAD207100DDAEDB /* String+Localization.swift */; };
 		F15A76922EAD297900DDAEDB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F15A76902EAD297900DDAEDB /* Localizable.strings */; };
 		F15A76A32EAE7FFF00DDAEDB /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = F15A76A12EAE7FFF00DDAEDB /* Localizable.stringsdict */; };
+		F15A76A92EAEACD500DDAEDB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F15A76A72EAEACD500DDAEDB /* InfoPlist.strings */; };
+		F15A76BC2EAEED2A00DDAEDB /* RswiftLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = F15A76BB2EAEED2A00DDAEDB /* RswiftLibrary */; };
 		F1A4AA092E9D4F8A0093A8E4 /* Tracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA072E9D4F8A0093A8E4 /* Tracker.xcdatamodeld */; };
 		F1A4AA0B2E9DA66E0093A8E4 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA0A2E9DA66E0093A8E4 /* CoreDataManager.swift */; };
 		F1A4AA0D2E9DB45E0093A8E4 /* TrackerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA0C2E9DB45E0093A8E4 /* TrackerStore.swift */; };
@@ -71,7 +72,6 @@
 		F1358F2F2E8C597E0095CC3E /* ColorSelectionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSelectionDelegate.swift; sourceTree = "<group>"; };
 		F1358F312E9030F00095CC3E /* TrackerCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCollectionViewCell.swift; sourceTree = "<group>"; };
 		F1358F332E9031730095CC3E /* SupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementaryView.swift; sourceTree = "<group>"; };
-		F15A76722EAD207100DDAEDB /* String+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		F15A76912EAD297900DDAEDB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F15A76942EAD2AA400DDAEDB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F15A76962EAD2AC400DDAEDB /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -81,6 +81,10 @@
 		F15A76A42EAE873B00DDAEDB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		F15A76A52EAE88CE00DDAEDB /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = fr; path = fr.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		F15A76A62EAE88DF00DDAEDB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		F15A76A82EAEACD500DDAEDB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F15A76AA2EAEACF900DDAEDB /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F15A76AB2EAEAD0800DDAEDB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F15A76AC2EAEAD1600DDAEDB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F1A4AA082E9D4F8A0093A8E4 /* Tracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Tracker.xcdatamodel; sourceTree = "<group>"; };
 		F1A4AA0A2E9DA66E0093A8E4 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		F1A4AA0C2E9DB45E0093A8E4 /* TrackerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStore.swift; sourceTree = "<group>"; };
@@ -109,6 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F15A76BC2EAEED2A00DDAEDB /* RswiftLibrary in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,9 +280,9 @@
 				F1ED86842E7854070082B276 /* Assets.xcassets */,
 				F1ED86852E7854070082B276 /* Info.plist */,
 				F1ED86872E7854070082B276 /* LaunchScreen.storyboard */,
-				F15A76722EAD207100DDAEDB /* String+Localization.swift */,
 				F15A76902EAD297900DDAEDB /* Localizable.strings */,
 				F15A76A12EAE7FFF00DDAEDB /* Localizable.stringsdict */,
+				F15A76A72EAEACD500DDAEDB /* InfoPlist.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -323,9 +328,11 @@
 			buildRules = (
 			);
 			dependencies = (
+				F15A76BE2EAEED4B00DDAEDB /* PBXTargetDependency */,
 			);
 			name = Tracker;
 			packageProductDependencies = (
+				F15A76BB2EAEED2A00DDAEDB /* RswiftLibrary */,
 			);
 			productName = Tracker;
 			productReference = F1ED86522E6EF3840082B276 /* Tracker.app */;
@@ -358,6 +365,9 @@
 			);
 			mainGroup = F1ED86492E6EF3840082B276;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F15A76BA2EAEED2A00DDAEDB /* XCRemoteSwiftPackageReference "R" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F1ED86532E6EF3840082B276 /* Products */;
 			projectDirPath = "";
@@ -377,6 +387,7 @@
 				F15A76A32EAE7FFF00DDAEDB /* Localizable.stringsdict in Resources */,
 				F15A76922EAD297900DDAEDB /* Localizable.strings in Resources */,
 				F1ED86902E7854070082B276 /* LaunchScreen.storyboard in Resources */,
+				F15A76A92EAEACD500DDAEDB /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,11 +435,17 @@
 				F1358F0C2E8C1B5E0095CC3E /* Tracker.swift in Sources */,
 				F1B10CA02EA52199007C4747 /* OnboardingViewController.swift in Sources */,
 				F1A4AA092E9D4F8A0093A8E4 /* Tracker.xcdatamodeld in Sources */,
-				F15A76732EAD207100DDAEDB /* String+Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F15A76BE2EAEED4B00DDAEDB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = F15A76BD2EAEED4B00DDAEDB /* RswiftGenerateInternalResources */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		F15A76902EAD297900DDAEDB /* Localizable.strings */ = {
@@ -451,6 +468,17 @@
 				F15A76A62EAE88DF00DDAEDB /* de */,
 			);
 			name = Localizable.stringsdict;
+			sourceTree = "<group>";
+		};
+		F15A76A72EAEACD500DDAEDB /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F15A76A82EAEACD500DDAEDB /* ru */,
+				F15A76AA2EAEACF900DDAEDB /* fr */,
+				F15A76AB2EAEAD0800DDAEDB /* en */,
+				F15A76AC2EAEAD1600DDAEDB /* de */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 		F1ED86872E7854070082B276 /* LaunchScreen.storyboard */ = {
@@ -667,6 +695,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F15A76BA2EAEED2A00DDAEDB /* XCRemoteSwiftPackageReference "R" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mac-cain13/R.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F15A76BB2EAEED2A00DDAEDB /* RswiftLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F15A76BA2EAEED2A00DDAEDB /* XCRemoteSwiftPackageReference "R" */;
+			productName = RswiftLibrary;
+		};
+		F15A76BD2EAEED4B00DDAEDB /* RswiftGenerateInternalResources */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F15A76BA2EAEED2A00DDAEDB /* XCRemoteSwiftPackageReference "R" */;
+			productName = "plugin:RswiftGenerateInternalResources";
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		F1A4AA072E9D4F8A0093A8E4 /* Tracker.xcdatamodeld */ = {

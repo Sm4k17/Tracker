@@ -11,18 +11,9 @@ final class AddCategoryViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = NSLocalizedString(
-            "new_category",
-            comment: "Screen title for creating new category"
-        )
-        static let textFieldPlaceholder = NSLocalizedString(
-            "enter_category_name",
-            comment: "Text field placeholder for category name input"
-        )
-        static let readyButtonTitle = NSLocalizedString(
-            "ready",
-            comment: "Ready button title for completing category creation"
-        )
+        static let navigationTitle = R.string.localizable.new_category()
+        static let textFieldPlaceholder = R.string.localizable.enter_category_name()
+        static let readyButtonTitle = R.string.localizable.ready()
         
         enum Layout {
             static let horizontalInset: CGFloat = 16

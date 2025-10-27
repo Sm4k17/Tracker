@@ -12,10 +12,9 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "category".localized
-        static let addCategoryButtonTitle = "add_category".localized
-        static let placeholderTitle = "what_to_track".localized
-        static let placeholderImageName = "icDizzy"
+        static let navigationTitle = R.string.localizable.category()
+        static let addCategoryButtonTitle = R.string.localizable.add_category()
+        static let placeholderTitle = R.string.localizable.what_to_track()
         
         static let buttonHorizontalInset: CGFloat = 20
         static let buttonBottomOffset: CGFloat = 16
@@ -71,8 +70,7 @@ final class CategorySelectionViewController: UIViewController {
     }()
     
     private lazy var placeholderImageView: UIImageView = {
-        let image = UIImage(named: Constants.placeholderImageName)
-        let imageView = UIImageView(image: image)
+        let imageView = UIImageView(image: R.image.icDizzy())
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.isHidden = false

@@ -62,7 +62,7 @@ final class EventConfigurationViewController: UIViewController {
             static let cancelButtonText: UIColor = .ypRed
             static let dropdownTitle: UIColor = .ypBlack
             static let dropdownSubtitle: UIColor = .ypGray
-            static let dropdownBackground: UIColor = .ypBackgroundDay
+            static let dropdownBackground: UIColor = .ypBackground
         }
     }
     
@@ -87,7 +87,7 @@ final class EventConfigurationViewController: UIViewController {
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = Constants.namePlaceholder
-        textField.backgroundColor = .ypBackgroundDay
+        textField.backgroundColor = .ypBackground
         textField.layer.cornerRadius = Constants.Layout.cornerRadius
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftViewMode = .always

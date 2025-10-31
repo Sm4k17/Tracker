@@ -32,7 +32,7 @@ final class ScheduleSelectionViewController: UIViewController {
         
         enum Colors {
             static let buttonText: UIColor = .ypWhite
-            static let stackViewBackground: UIColor = .ypBackgroundDay
+            static let stackViewBackground: UIColor = .ypBackground
             static let dayLabel: UIColor = .ypBlack
             static let separator: UIColor = .ypGray
             static let switchTint: UIColor = .ypBlue

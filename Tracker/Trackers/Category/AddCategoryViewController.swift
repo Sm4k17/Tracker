@@ -25,7 +25,7 @@ final class AddCategoryViewController: UIViewController {
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = Constants.textFieldPlaceholder
-        textField.backgroundColor = .ypBackgroundDay
+        textField.backgroundColor = .ypBackground
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))

@@ -226,7 +226,7 @@ extension CategorySelectionViewController: UITableViewDataSource {
         cell.textLabel?.text = category
         cell.textLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.textColor = .ypBlack
-        cell.backgroundColor = .ypBackgroundDay
+        cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         
         // Галочка для выбранной категории

@@ -16,6 +16,11 @@ final class OnboardingViewController: UIPageViewController {
     private enum Constants {
         static let bottomOffset: CGFloat = 134
         
+        // Статические цвета для онбординга
+        static let backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        static let pageControlCurrentColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        static let pageControlDefaultColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 0.3)
+        
         enum OnboardingStep: Int, CaseIterable {
             case blue
             case red
@@ -60,8 +65,8 @@ final class OnboardingViewController: UIPageViewController {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0
-        pageControl.currentPageIndicatorTintColor = .ypBlack
-        pageControl.pageIndicatorTintColor = UIColor.ypBlack.withAlphaComponent(0.3)
+        pageControl.currentPageIndicatorTintColor = Constants.pageControlCurrentColor
+        pageControl.pageIndicatorTintColor = Constants.pageControlDefaultColor
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         return pageControl
     }()
@@ -84,7 +89,7 @@ final class OnboardingViewController: UIPageViewController {
     
     // MARK: - Setup Methods
     private func setupUI() {
-        view.backgroundColor = .ypWhite
+        view.backgroundColor = Constants.backgroundColor
         setupDataSourceAndDelegate()
     }
     

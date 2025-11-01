@@ -450,12 +450,12 @@ final class EventConfigurationViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapCategoryButton() {
-         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
-         self?.selectedCategory = category
-         self?.updateCategoryButtonSubtitle(category)
-         self?.updateCreateButtonState()
-         }
-         navigationController?.pushViewController(categoryVC, animated: true)
+        let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
+            self?.selectedCategory = category
+            self?.updateCategoryButtonSubtitle(category)
+            self?.updateCreateButtonState()
+        }
+        navigationController?.pushViewController(categoryVC, animated: true)
     }
     
     private func didTapCancelButton() {
@@ -507,6 +507,10 @@ final class EventConfigurationViewController: UIViewController {
     }
     
     private func showError(message: String) {
+        AnalyticsService.shared.report(event: "error_occurred", params: [
+            "error_message": message,
+            "screen": "trackers_main"
+        ])
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)

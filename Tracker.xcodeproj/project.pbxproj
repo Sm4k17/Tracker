@@ -33,6 +33,8 @@
 		F15A76DC2EB281F100DDAEDB /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = F15A76DB2EB281F100DDAEDB /* InlineSnapshotTesting */; };
 		F15A76DE2EB281F100DDAEDB /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = F15A76DD2EB281F100DDAEDB /* SnapshotTesting */; };
 		F15A76E02EB281F100DDAEDB /* SnapshotTestingCustomDump in Frameworks */ = {isa = PBXBuildFile; productRef = F15A76DF2EB281F100DDAEDB /* SnapshotTestingCustomDump */; };
+		F15A78E82EB67DD200DDAEDB /* AppMetricaCore in Frameworks */ = {isa = PBXBuildFile; productRef = F15A78E72EB67DD200DDAEDB /* AppMetricaCore */; };
+		F15A792D2EB6C6AA00DDAEDB /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F15A792C2EB6C6AA00DDAEDB /* AnalyticsService.swift */; };
 		F1A4AA092E9D4F8A0093A8E4 /* Tracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA072E9D4F8A0093A8E4 /* Tracker.xcdatamodeld */; };
 		F1A4AA0B2E9DA66E0093A8E4 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA0A2E9DA66E0093A8E4 /* CoreDataManager.swift */; };
 		F1A4AA0D2E9DB45E0093A8E4 /* TrackerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A4AA0C2E9DB45E0093A8E4 /* TrackerStore.swift */; };
@@ -99,6 +101,7 @@
 		F15A76AB2EAEAD0800DDAEDB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F15A76AC2EAEAD1600DDAEDB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F15A76CF2EB27B2600DDAEDB /* TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F15A792C2EB6C6AA00DDAEDB /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		F1A4AA082E9D4F8A0093A8E4 /* Tracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Tracker.xcdatamodel; sourceTree = "<group>"; };
 		F1A4AA0A2E9DA66E0093A8E4 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		F1A4AA0C2E9DB45E0093A8E4 /* TrackerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStore.swift; sourceTree = "<group>"; };
@@ -146,6 +149,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F15A76BC2EAEED2A00DDAEDB /* RswiftLibrary in Frameworks */,
+				F15A78E82EB67DD200DDAEDB /* AppMetricaCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +220,14 @@
 				F1358F292E8C35820095CC3E /* ScheduleSelectionViewController.swift */,
 			);
 			path = Schedule;
+			sourceTree = "<group>";
+		};
+		F15A792A2EB6C69900DDAEDB /* AnalyticsService */ = {
+			isa = PBXGroup;
+			children = (
+				F15A792C2EB6C6AA00DDAEDB /* AnalyticsService.swift */,
+			);
+			path = AnalyticsService;
 			sourceTree = "<group>";
 		};
 		F1A4AA062E9D4DA60093A8E4 /* CoreData */ = {
@@ -289,6 +301,7 @@
 		F1ED868A2E7854070082B276 /* Tracker */ = {
 			isa = PBXGroup;
 			children = (
+				F15A792A2EB6C69900DDAEDB /* AnalyticsService */,
 				F1ED86AF2E78AC080082B276 /* Trackers */,
 				F1A4AA062E9D4DA60093A8E4 /* CoreData */,
 				F1ED86A22E78664B0082B276 /* Resources */,
@@ -393,6 +406,7 @@
 			name = Tracker;
 			packageProductDependencies = (
 				F15A76BB2EAEED2A00DDAEDB /* RswiftLibrary */,
+				F15A78E72EB67DD200DDAEDB /* AppMetricaCore */,
 			);
 			productName = Tracker;
 			productReference = F1ED86522E6EF3840082B276 /* Tracker.app */;
@@ -432,6 +446,7 @@
 			packageReferences = (
 				F15A76BA2EAEED2A00DDAEDB /* XCRemoteSwiftPackageReference "R" */,
 				F15A76DA2EB281F100DDAEDB /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				F15A78E62EB67DD100DDAEDB /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F1ED86532E6EF3840082B276 /* Products */;
@@ -500,6 +515,7 @@
 				F1358F242E8C35140095CC3E /* EmojiSelectionViewController.swift in Sources */,
 				F1B10CA52EA5220E007C4747 /* OnboardingPage.swift in Sources */,
 				F1358F1E2E8C2D720095CC3E /* EventConfigurationViewController.swift.swift in Sources */,
+				F15A792D2EB6C6AA00DDAEDB /* AnalyticsService.swift in Sources */,
 				F1358F2E2E8C590D0095CC3E /* EmojiSelectionDelegate.swift in Sources */,
 				F1358F122E8C23D70095CC3E /* TrackerRecord.swift in Sources */,
 				F1358F0A2E8C1B190095CC3E /* CreationTrackerDelegate.swift in Sources */,
@@ -851,6 +867,14 @@
 				minimumVersion = 1.18.7;
 			};
 		};
+		F15A78E62EB67DD100DDAEDB /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/appmetrica/appmetrica-sdk-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.14.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -878,6 +902,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F15A76DA2EB281F100DDAEDB /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTestingCustomDump;
+		};
+		F15A78E72EB67DD200DDAEDB /* AppMetricaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F15A78E62EB67DD100DDAEDB /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */;
+			productName = AppMetricaCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 

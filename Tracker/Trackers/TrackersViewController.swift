@@ -49,14 +49,6 @@ final class TrackersViewController: UIViewController {
                 collectionSectionInsetLeft + collectionSectionInsetRight + collectionItemSpacing
             }
         }
-        
-        // ЦВЕТА ДЛЯ ТЕКСТА
-        enum Colors {
-            static let searchPlaceholder: UIColor = .ypGray
-            static let searchText: UIColor = .ypBlack
-            static let dateButtonText: UIColor = .ypBlack
-            static let searchBackground: UIColor = .ypGrayS
-        }
     }
     
     // MARK: - Properties
@@ -87,6 +79,11 @@ final class TrackersViewController: UIViewController {
         let button = UIBarButtonItem(
             image: buttonImage,
             primaryAction: UIAction { [weak self] _ in
+                // Аналитика: пользователь нажал кнопку создания трекера
+                AnalyticsService.shared.report(event: "tracker_creation_opened", params: [
+                    "screen": "trackers_main",
+                    "source": "plus_button"
+                ])
                 self?.didTapAddButton()
             }
         )
@@ -188,6 +185,10 @@ final class TrackersViewController: UIViewController {
         setupStores()
         loadData()
         updatePlaceholderVisibility()
+        AnalyticsService.shared.report(event: "screen_opened", params: [
+            "screen_name": "trackers_main",
+            "screen_class": String(describing: type(of: self))
+        ])
     }
     
     private func setupStores() {
@@ -463,6 +464,13 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text else { return }
+        
+        AnalyticsService.shared.report(event: "search_performed", params: [
+            "search_query": searchText,
+            "query_length": searchText.count,
+            "results_count": filteredCategories.flatMap { $0.trackers }.count
+        ])
+        
         print("Search text: \(searchText)")
         // Здесь будет логика фильтрации по поиску
     }
@@ -486,15 +494,34 @@ extension TrackersViewController: TrackerCellDelegate {
         let selectedDate = Calendar.current.startOfDay(for: currentDate)
         
         guard selectedDate <= today else {
+            // Аналитика: попытка отметить трекер в будущем
+            AnalyticsService.shared.report(event: "tracker_future_date_attempt", params: [
+                "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
+                "selected_date": dateFormatter.string(from: currentDate)
+            ])
             print("⚠️ Нельзя отметить трекер для будущей даты: \(currentDate)")
             return
         }
         
         do {
-            if recordStore.isTrackerCompleted(trackerId: trackerId, date: currentDate) {
+            let wasCompleted = recordStore.isTrackerCompleted(trackerId: trackerId, date: currentDate)
+            
+            if wasCompleted {
                 try recordStore.removeRecord(trackerId: trackerId, date: currentDate)
+                // Аналитика: трекер отмечен как невыполненный
+                AnalyticsService.shared.report(event: "tracker_uncompleted", params: [
+                    "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
+                    "category": tracker.category,
+                    "date": dateFormatter.string(from: currentDate)
+                ])
             } else {
                 try recordStore.addRecord(trackerId: trackerId, date: currentDate)
+                // Аналитика: трекер отмечен как выполненный
+                AnalyticsService.shared.report(event: "tracker_completed", params: [
+                    "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
+                    "category": tracker.category,
+                    "date": dateFormatter.string(from: currentDate)
+                ])
             }
             
             // Обновляем completedTrackers из Core Data
@@ -518,6 +545,10 @@ extension TrackersViewController: TrackerCellDelegate {
                 }
             }
         } catch {
+            // Аналитика: ошибка при обновлении трекера
+            AnalyticsService.shared.report(event: "tracker_update_error", params: [
+                "error": error.localizedDescription
+            ])
             print("❌ Error updating record: \(error)")
             showErrorAlert(message: "Не удалось обновить статус трекера")
         }
@@ -545,6 +576,10 @@ extension TrackersViewController: TrackerViewControllerDelegate {
     }
     
     private func showErrorAlert(message: String) {
+        AnalyticsService.shared.report(event: "error_occurred", params: [
+            "error_message": message,
+            "screen": "trackers_main"
+        ])
         let alert = UIAlertController(
             title: "Ошибка",
             message: message,

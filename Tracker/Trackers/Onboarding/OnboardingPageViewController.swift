@@ -20,6 +20,12 @@ final class OnboardingPageViewController: UIViewController {
         static let buttonCornerRadius: CGFloat = 16
         static let titleFontSize: CGFloat = 32
         static let buttonFontSize: CGFloat = 16
+        
+        // Статические цвета для онбординга
+        static let backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        static let textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        static let buttonBackgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        static let buttonTextColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
     }
     
     // MARK: - UI Components
@@ -37,7 +43,7 @@ final class OnboardingPageViewController: UIViewController {
         label.text = page.titleText
         label.numberOfLines = 2
         label.textAlignment = .center
-        label.textColor = .ypBlack
+        label.textColor = Constants.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -46,8 +52,8 @@ final class OnboardingPageViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle(R.string.localizable.cool_technologies(), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
-        button.setTitleColor(.ypWhite, for: .normal)
-        button.backgroundColor = .ypBlack
+        button.setTitleColor(Constants.buttonTextColor, for: .normal)
+        button.backgroundColor = Constants.buttonBackgroundColor
         button.layer.cornerRadius = Constants.buttonCornerRadius
         button.layer.masksToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -80,7 +86,7 @@ final class OnboardingPageViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupUI() {
-        view.backgroundColor = .ypWhite
+        view.backgroundColor = Constants.backgroundColor
         setupViews()
         setupConstraints()
     }
@@ -120,6 +126,13 @@ final class OnboardingPageViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapActionButton() {
+        
+        // Аналитика: завершение онбординга
+        AnalyticsService.shared.report(event: "onboarding_completed", params: [
+            "screen": "onboarding",
+            "action": "complete"
+        ])
+        
         // Сохраняем факт прохождения онбординга
         OnboardingStorage.isOnboardingCompleted = true
         

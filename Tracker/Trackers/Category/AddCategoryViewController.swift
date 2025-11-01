@@ -80,6 +80,10 @@ final class AddCategoryViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTapGesture()
+        AnalyticsService.shared.report(event: "screen_opened", params: [
+            "screen_name": "AddCategory",
+            "screen_class": String(describing: type(of: self))
+        ])
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -138,6 +142,11 @@ final class AddCategoryViewController: UIViewController {
               !categoryName.isEmpty else {
             return
         }
+        
+        AnalyticsService.shared.report(event: "category_created", params: [
+            "category_name_length": categoryName.count,
+            "screen": "add_category"
+        ])
         
         // Вызываем колбэк и возвращаемся назад со стандартной анимацией
         onCategoryCreated(categoryName)

@@ -257,6 +257,12 @@ extension CategorySelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCategory = viewModel.selectCategory(at: indexPath.row)
+        
+        AnalyticsService.shared.report(event: "category_selected", params: [
+            "category_name": selectedCategory,
+            "screen": "category_selection"
+        ])
+        
         onCategorySelected(selectedCategory)
         navigationController?.popViewController(animated: true)
     }

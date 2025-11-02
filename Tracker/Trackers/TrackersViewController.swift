@@ -303,7 +303,24 @@ final class TrackersViewController: UIViewController {
         let isEmpty = filteredCategories.isEmpty || filteredCategories.allSatisfy { $0.trackers.isEmpty }
         placeholderStackView.isHidden = !isEmpty
         collectionView.isHidden = isEmpty
+        
+        if !searchText.isEmpty && isEmpty {
+            // Показываем плейсхолдер для пустого поиска
+            placeholderLabel.text = "Ничего не найдено"
+            placeholderImageView.image = R.image.icSearchEmpty()
+        } else if categories.isEmpty {
+            // Показываем стандартный плейсхолдер когда нет трекеров вообще
+            placeholderLabel.text = Constants.placeholderTitle
+            placeholderImageView.image = R.image.icDizzy()
+        } else {
+            // Показываем плейсхолдер когда нет трекеров на выбранную дату
+            placeholderLabel.text = Constants.placeholderTitle
+            placeholderImageView.image = R.image.icDizzy()
+        }
     }
+    
+    // MARK: - Properties
+    private var searchText: String = ""
     
     private func filterTrackersForCurrentDate() {
         let calendar = Calendar.current
@@ -324,12 +341,20 @@ final class TrackersViewController: UIViewController {
         let oldFilteredCategories = filteredCategories
         let newFilteredCategories = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
-                tracker.scheduleTrackers.isEmpty || tracker.scheduleTrackers.contains(ourWeekday)
+                // Фильтрация по расписанию
+                let matchesSchedule = tracker.scheduleTrackers.isEmpty ||
+                tracker.scheduleTrackers.contains(ourWeekday)
+                
+                // Фильтрация по поиску
+                let matchesSearch = searchText.isEmpty ||
+                tracker.name.lowercased().contains(searchText.lowercased())
+                
+                return matchesSchedule && matchesSearch
             }
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
         
-        // 🔧 ПРАВИЛЬНАЯ ЛОГИКА ОБНОВЛЕНИЯ:
+        // 🔧 СОХРАНЯЕМ ВАШУ ОПТИМИЗИРОВАННУЮ ЛОГИКУ ОБНОВЛЕНИЯ
         if oldFilteredCategories.count != newFilteredCategories.count {
             // Если количество секций изменилось - полный reload
             filteredCategories = newFilteredCategories
@@ -465,20 +490,38 @@ extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text else { return }
         
+        // Сохраняем поисковый запрос
+        self.searchText = searchText
+        
+        // Аналитика
         AnalyticsService.shared.report(event: "search_performed", params: [
             "search_query": searchText,
             "query_length": searchText.count,
             "results_count": filteredCategories.flatMap { $0.trackers }.count
         ])
         
-        print("Search text: \(searchText)")
-        // Здесь будет логика фильтрации по поиску
+        // Применяем фильтрацию с вашей оптимизированной логикой
+        filterTrackersForCurrentDate()
     }
 }
 
 extension TrackersViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        // При отмене поиска очищаем поисковый запрос
+        searchText = ""
+        filterTrackersForCurrentDate()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            // Если текст очищен, сбрасываем поиск
+            self.searchText = ""
+            filterTrackersForCurrentDate()
+        }
     }
 }
 

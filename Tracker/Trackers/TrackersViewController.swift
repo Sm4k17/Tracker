@@ -44,6 +44,11 @@ final class TrackersViewController: UIViewController {
             static let searchTextFieldCornerRadius: CGFloat = 10
             static let searchTextFieldFontSize: CGFloat = 17
             
+            // Filter Button
+            static let filterButtonWidth: CGFloat = 114
+            static let filterButtonHeight: CGFloat = 50
+            static let filterButtonBottomInset: CGFloat = 16
+            
             // Вычисляемые константы
             static var collectionTotalHorizontalInset: CGFloat {
                 collectionSectionInsetLeft + collectionSectionInsetRight + collectionItemSpacing
@@ -58,8 +63,16 @@ final class TrackersViewController: UIViewController {
             filterTrackersForCurrentDate()
         }
     }
-    private var completedTrackers: [TrackerRecord] = []
+    
+    private var completedTrackers: [TrackerRecord] = [] {
+        didSet {
+            // Автоматическое обновление при изменении статусов трекеров
+            filterTrackersForCurrentDate()
+        }
+    }
+    
     private var currentDate: Date = Date()
+    private var currentFilter: TrackerFilter = .all
     private var filteredCategories: [TrackerCategory] = []
     
     // MARK: - Core Data Stores
@@ -116,6 +129,23 @@ final class TrackersViewController: UIViewController {
         searchController.searchBar.delegate = self
         
         return searchController
+    }()
+    
+    // Кнопка фильтра
+    private lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Фильтры", for: .normal)
+        button.backgroundColor = .ypBlue
+        button.setTitleColor(UIColor(named: "ypWhite"), for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.layer.cornerRadius = 16
+        button.layer.masksToBounds = true
+        
+        button.addAction(UIAction { [weak self] _ in
+            self?.didTapFilterButton()
+        }, for: .touchUpInside)
+        
+        return button
     }()
     
     // StackView для размещения иконки и текста плейсхолдера
@@ -179,12 +209,15 @@ final class TrackersViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadCurrentFilter()
         setupUI()
         setupNavigationBar()
         setupCollectionView()
         setupStores()
         loadData()
         updatePlaceholderVisibility()
+        updateFilterButtonVisibility()
+        updateFilterButtonAppearance()
         AnalyticsService.shared.report(event: "screen_opened", params: [
             "screen_name": "trackers_main",
             "screen_class": String(describing: type(of: self))
@@ -221,6 +254,8 @@ final class TrackersViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.keyboardDismissMode = .onDrag
+        collectionView.alwaysBounceVertical = true
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
     }
     
     private func setupNavigationBar() {
@@ -250,7 +285,7 @@ final class TrackersViewController: UIViewController {
             view.addSubview($0)
         }
         
-        [placeholderStackView, collectionView].forEach {
+        [placeholderStackView, collectionView, filterButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
@@ -284,7 +319,14 @@ final class TrackersViewController: UIViewController {
             placeholderImageView.heightAnchor.constraint(equalToConstant: Constants.Layout.placeholderImageSize),
             
             //datePicker
-            datePicker.widthAnchor.constraint(equalToConstant: 100)
+            datePicker.widthAnchor.constraint(equalToConstant: 100),
+            
+            // Filter Button
+            filterButton.widthAnchor.constraint(equalToConstant: Constants.Layout.filterButtonWidth),
+            filterButton.heightAnchor.constraint(equalToConstant: Constants.Layout.filterButtonHeight),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                 constant: -Constants.Layout.filterButtonBottomInset),
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
     }
     
@@ -304,18 +346,17 @@ final class TrackersViewController: UIViewController {
         placeholderStackView.isHidden = !isEmpty
         collectionView.isHidden = isEmpty
         
-        if !searchText.isEmpty && isEmpty {
-            // Показываем плейсхолдер для пустого поиска
-            placeholderLabel.text = "Ничего не найдено"
-            placeholderImageView.image = R.image.icSearchEmpty()
-        } else if categories.isEmpty {
-            // Показываем стандартный плейсхолдер когда нет трекеров вообще
-            placeholderLabel.text = Constants.placeholderTitle
-            placeholderImageView.image = R.image.icDizzy()
-        } else {
-            // Показываем плейсхолдер когда нет трекеров на выбранную дату
-            placeholderLabel.text = Constants.placeholderTitle
-            placeholderImageView.image = R.image.icDizzy()
+        if isEmpty {
+            if !searchText.isEmpty {
+                placeholderLabel.text = "Ничего не найдено"
+                placeholderImageView.image = R.image.icSearchEmpty()
+            } else if currentFilter == .completed || currentFilter == .uncompleted {
+                placeholderLabel.text = "Ничего не найдено"
+                placeholderImageView.image = R.image.icStatsEmpty() ?? R.image.icDizzy()
+            } else {
+                placeholderLabel.text = Constants.placeholderTitle
+                placeholderImageView.image = R.image.icDizzy()
+            }
         }
     }
     
@@ -339,28 +380,22 @@ final class TrackersViewController: UIViewController {
         }
         
         let oldFilteredCategories = filteredCategories
-        let newFilteredCategories = categories.compactMap { category in
-            let filteredTrackers = category.trackers.filter { tracker in
-                // Фильтрация по расписанию
-                let matchesSchedule = tracker.scheduleTrackers.isEmpty ||
-                tracker.scheduleTrackers.contains(ourWeekday)
-                
-                // Фильтрация по поиску
-                let matchesSearch = searchText.isEmpty ||
-                tracker.name.lowercased().contains(searchText.lowercased())
-                
-                return matchesSchedule && matchesSearch
-            }
-            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
-        }
+        let newFilteredCategories = TrackerFilterService.filterTrackers(
+            categories: categories,
+            currentFilter: currentFilter,
+            completedTrackers: completedTrackers,
+            currentDate: currentDate,
+            searchText: searchText,
+            weekday: ourWeekday
+        )
         
-        // 🔧 СОХРАНЯЕМ ВАШУ ОПТИМИЗИРОВАННУЮ ЛОГИКУ ОБНОВЛЕНИЯ
+        // Оптимизированная логика обновления
         if oldFilteredCategories.count != newFilteredCategories.count {
-            // Если количество секций изменилось - полный reload
             filteredCategories = newFilteredCategories
-            collectionView.reloadData()
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
         } else {
-            // Если количество секций одинаковое - обновляем по секциям
             filteredCategories = newFilteredCategories
             
             var sectionsToReload: [Int] = []
@@ -374,13 +409,18 @@ final class TrackersViewController: UIViewController {
             }
             
             if !sectionsToReload.isEmpty {
-                collectionView.performBatchUpdates {
-                    collectionView.reloadSections(IndexSet(sectionsToReload))
+                DispatchQueue.main.async {
+                    self.collectionView.performBatchUpdates {
+                        self.collectionView.reloadSections(IndexSet(sectionsToReload))
+                    }
                 }
             }
         }
         
-        updatePlaceholderVisibility()
+        DispatchQueue.main.async {
+            self.updatePlaceholderVisibility()
+            self.updateFilterButtonVisibility()
+        }
     }
     
     private func isTrackerCompletedToday(id: UUID) -> Bool {
@@ -397,6 +437,104 @@ final class TrackersViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - Filter Persistence
+    private func saveCurrentFilter() {
+        let filterValue: Int
+        switch currentFilter {
+        case .all: filterValue = 0
+        case .today: filterValue = 1
+        case .completed: filterValue = 2
+        case .uncompleted: filterValue = 3
+        }
+        UserDefaults.standard.set(filterValue, forKey: "currentTrackerFilter")
+    }
+    
+    private func loadCurrentFilter() {
+        let savedFilterValue = UserDefaults.standard.integer(forKey: "currentTrackerFilter")
+        switch savedFilterValue {
+        case 1: currentFilter = .today
+        case 2: currentFilter = .completed
+        case 3: currentFilter = .uncompleted
+        default: currentFilter = .all
+        }
+    }
+    
+    // MARK: - Filter Methods
+    private func updateFilterButtonVisibility() {
+        // Проверяем, есть ли трекеры на выбранную дату (с учетом расписания)
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: currentDate)
+        
+        let ourWeekday: Week
+        switch weekday {
+        case 1: ourWeekday = .sunday
+        case 2: ourWeekday = .monday
+        case 3: ourWeekday = .tuesday
+        case 4: ourWeekday = .wednesday
+        case 5: ourWeekday = .thursday
+        case 6: ourWeekday = .friday
+        case 7: ourWeekday = .saturday
+        default: ourWeekday = .monday
+        }
+        
+        let hasTrackersForCurrentDate = categories.contains { category in
+            category.trackers.contains { tracker in
+                // Проверяем, должен ли трекер отображаться на выбранную дату
+                let matchesSchedule = tracker.scheduleTrackers.isEmpty ||
+                tracker.scheduleTrackers.contains(ourWeekday)
+                return matchesSchedule
+            }
+        }
+        
+        filterButton.isHidden = !hasTrackersForCurrentDate
+    }
+    
+    private func updateFilterButtonAppearance() {
+        // Красный цвет только для фильтров "Завершенные" и "Не завершенные"
+        let isFilterActive = currentFilter == .completed || currentFilter == .uncompleted
+        filterButton.setTitleColor(isFilterActive ? .ypRed : .white, for: .normal)
+        filterButton.alpha = isFilterActive ? 0.9 : 1.0
+    }
+    
+    private func applyFilter(_ filter: TrackerFilter) {
+        _ = currentFilter
+        
+        switch filter {
+        case .today:
+            // Для "Трекеры на сегодня" сбрасываем фильтр на .all
+            currentFilter = .all
+            let today = Date()
+            currentDate = today
+            datePicker.date = today
+            
+            // Принудительно обновляем completedTrackers для новой даты
+            completedTrackers = recordStore.fetchCompletedTrackers()
+            
+        case .all, .completed, .uncompleted:
+            // Для этих фильтров не меняем дату
+            currentFilter = filter
+        }
+        
+        saveCurrentFilter()
+        
+        // ОБНОВЛЯЕМ UI в главном потоке
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            if filter == .today {
+                self.completedTrackers = self.recordStore.fetchCompletedTrackers()
+            }
+            
+            self.filterTrackersForCurrentDate()
+            self.updateFilterButtonAppearance()
+        }
+        
+        AnalyticsService.shared.report(event: "filter_applied", params: [
+            "filter_type": String(describing: filter),
+            "screen": "trackers_main"
+        ])
     }
     
     // MARK: - Actions
@@ -416,10 +554,36 @@ final class TrackersViewController: UIViewController {
         print("Date changed: \(formattedDate)")
         
         currentDate = selectedDate
-        filterTrackersForCurrentDate()
         
-        // Принудительно обновляем все видимые ячейки
-        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        // сбрасываем фильтр только если был активен фильтр "Трекеры на сегодня"
+        if currentFilter == .today {
+            currentFilter = .all
+            saveCurrentFilter()
+            updateFilterButtonAppearance()
+        }
+        
+        // ОБНОВЛЯЕМ completedTrackers в главном потоке
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.completedTrackers = self.recordStore.fetchCompletedTrackers()
+            // Всегда обновляем фильтрацию при смене даты
+            self.filterTrackersForCurrentDate()
+            // Обновляем видимость кнопки фильтра
+            self.updateFilterButtonVisibility()
+        }
+    }
+    
+    private func didTapFilterButton() {
+        let filtersVC = TrackerFiltersViewController(selectedFilter: currentFilter)
+        filtersVC.onFilterSelected = { [weak self] filter in
+            guard let self = self else { return }
+            self.applyFilter(filter)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: filtersVC)
+        navigationController.modalPresentationStyle = .pageSheet
+        navigationController.isModalInPresentation = false
+        present(navigationController, animated: true)
     }
 }
 
@@ -478,6 +642,25 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return calculateCollectionViewItemSize()
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let _ = scrollView.contentSize.height
+        let _ = scrollView.frame.size.height
+        
+        // Показываем/скрываем кнопку фильтра при скролле
+        if offsetY > 100 {
+            // Если пользователь прокрутил вниз, скрываем кнопку
+            UIView.animate(withDuration: 0.3) {
+                self.filterButton.alpha = 0.0
+            }
+        } else {
+            // Показываем кнопку когда вверху
+            UIView.animate(withDuration: 0.3) {
+                self.filterButton.alpha = 1.0
+            }
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
@@ -567,24 +750,34 @@ extension TrackersViewController: TrackerCellDelegate {
                 ])
             }
             
-            // Обновляем completedTrackers из Core Data
-            completedTrackers = recordStore.fetchCompletedTrackers()
-            
-            // 🔒 БЕЗОПАСНО: Обновляем только одну ячейку
-            collectionView.performBatchUpdates {
-                if let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell {
-                    let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
-                    let isCompletedToday = recordStore.isTrackerCompleted(trackerId: trackerId, date: currentDate)
-                    let completedDays = recordStore.completedDaysCount(for: trackerId)
-                    
-                    let viewModel = TrackerViewModel(
-                        tracker: tracker,
-                        isCompletedToday: isCompletedToday,
-                        completedDays: completedDays,
-                        currentDate: currentDate
-                    )
-                    
-                    cell.configure(with: viewModel, animated: true)
+            // Обновляем completedTrackers из Core Data в главном потоке
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.completedTrackers = self.recordStore.fetchCompletedTrackers()
+                
+                // полностью перезагружаем данные, так как трекер может изменить свой статус
+                // и перестать соответствовать текущему фильтру
+                if self.currentFilter == .completed || self.currentFilter == .uncompleted {
+                    // Полностью перезагружаем данные и collectionView
+                    self.filterTrackersForCurrentDate()
+                } else {
+                    // 🔒 БЕЗОПАСНО: Обновляем только одну ячейку если фильтр не активен
+                    self.collectionView.performBatchUpdates {
+                        if let cell = self.collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell {
+                            let tracker = self.filteredCategories[indexPath.section].trackers[indexPath.row]
+                            let isCompletedToday = self.recordStore.isTrackerCompleted(trackerId: trackerId, date: self.currentDate)
+                            let completedDays = self.recordStore.completedDaysCount(for: trackerId)
+                            
+                            let viewModel = TrackerViewModel(
+                                tracker: tracker,
+                                isCompletedToday: isCompletedToday,
+                                completedDays: completedDays,
+                                currentDate: self.currentDate
+                            )
+                            
+                            cell.configure(with: viewModel, animated: true)
+                        }
+                    }
                 }
             }
         } catch {
@@ -593,7 +786,9 @@ extension TrackersViewController: TrackerCellDelegate {
                 "error": error.localizedDescription
             ])
             print("❌ Error updating record: \(error)")
-            showErrorAlert(message: "Не удалось обновить статус трекера")
+            DispatchQueue.main.async {
+                self.showErrorAlert(message: "Не удалось обновить статус трекера")
+            }
         }
     }
 }
@@ -636,14 +831,19 @@ extension TrackersViewController: TrackerViewControllerDelegate {
 // MARK: - TrackerStoreDelegate
 extension TrackersViewController: TrackerStoreDelegate {
     func didUpdateTrackers() {
-        // Обновляем данные из Core Data
-        categories = trackerStore.fetchCategories()
-        completedTrackers = recordStore.fetchCompletedTrackers()
-        
-        // filterTrackersForCurrentDate() автоматически вызовется через didSet categories
-        // collectionView обновится через наблюдатель в filterTrackersForCurrentDate()
-        
-        updatePlaceholderVisibility()
+        // ОБНОВЛЯЕМ В ГЛАВНОМ ПОТОКЕ
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.categories = self.trackerStore.fetchCategories()
+            self.completedTrackers = self.recordStore.fetchCompletedTrackers()
+            
+            // filterTrackersForCurrentDate() автоматически вызовется через didSet categories
+            // collectionView обновится через наблюдатель в filterTrackersForCurrentDate()
+            
+            self.updatePlaceholderVisibility()
+            self.updateFilterButtonVisibility()
+            self.updateFilterButtonAppearance()
+        }
     }
 }
 

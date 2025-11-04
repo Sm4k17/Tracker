@@ -34,12 +34,9 @@ final class CategoryViewModel {
         categoriesDidUpdate?()
     }
     
-    // MARK: - Context Menu Methods
     func updateCategory(from oldName: String, to newName: String) {
         do {
-            // Проверяем, что новое название уникально (если оно изменилось)
             if oldName != newName && !categoryStore.isCategoryNameUnique(newName) {
-                // Откладываем показ ошибки, чтобы модальное окно успело закрыться
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                     self?.onError?("Категория с названием '\(newName)' уже существует")
                 }
@@ -49,10 +46,6 @@ final class CategoryViewModel {
             try categoryStore.updateCategory(from: oldName, to: newName)
             // Делегат автоматически вызовет обновление через controllerDidChangeContent
             
-            AnalyticsService.shared.report(event: "category_edited", params: [
-                "old_name": oldName,
-                "new_name": newName
-            ])
         } catch {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.onError?("Ошибка редактирования категории: \(error.localizedDescription)")
@@ -62,7 +55,6 @@ final class CategoryViewModel {
     
     func createCategory(title: String) {
         do {
-            // Проверяем уникальность названия
             guard categoryStore.isCategoryNameUnique(title) else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                     self?.onError?("Категория с таким названием уже существует")
@@ -81,13 +73,8 @@ final class CategoryViewModel {
     
     func deleteCategory(_ category: String) {
         do {
-            // УДАЛЯЕМ ПРОВЕРКУ НА ПУСТОТУ - удаляем категорию даже если в ней есть трекеры
             try categoryStore.deleteCategory(title: category)
             // Делегат автоматически вызовет обновление через controllerDidChangeContent
-            
-            AnalyticsService.shared.report(event: "category_deleted", params: [
-                "category_name": category
-            ])
         } catch {
             onError?("Ошибка удаления категории: \(error.localizedDescription)")
         }

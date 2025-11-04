@@ -50,6 +50,7 @@ final class TrackersViewController: UIViewController {
     private var currentDate: Date = Date()
     private var currentFilter: TrackerFilter = .all
     private var searchText: String = ""
+    private let categoryViewModel = CategoryViewModel()
     
     // MARK: - Core Data Stores
     private let trackerStore = TrackerStore()
@@ -107,6 +108,7 @@ final class TrackersViewController: UIViewController {
         setupNavigationBar()
         setupCollectionView()
         setupStores()
+        setupCategoryViewModel()
         loadData()
         AnalyticsService.shared.report(event: "screen_opened", params: [
             "screen_name": "trackers_main",
@@ -120,6 +122,22 @@ final class TrackersViewController: UIViewController {
         setupViews()
         setupConstraints()
         setupTapGesture()
+    }
+    
+    // MARK: - Category ViewModel Setup
+    private func setupCategoryViewModel() {
+        categoryViewModel.categoriesDidUpdate = { [weak self] in
+            DispatchQueue.main.async {
+                // При изменении категорий перезагружаем трекеры
+                self?.categories = self?.trackerStore.fetchCategories() ?? []
+                self?.completedTrackers = self?.recordStore.fetchCompletedTrackers() ?? []
+                self?.filterTrackersForCurrentDate()
+                
+                AnalyticsService.shared.report(event: "categories_updated_in_trackers", params: [
+                    "screen": "trackers_main"
+                ])
+            }
+        }
     }
     
     private func setupStores() {

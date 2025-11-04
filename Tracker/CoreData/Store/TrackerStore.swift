@@ -30,6 +30,12 @@ final class TrackerStore: NSObject {
         self.context = context
         super.init()
         setupFetchedResultsController()
+        setupCategoryStoreDelegate()
+    }
+    
+    // MARK: - Category Store Delegate
+    private func setupCategoryStoreDelegate() {
+        categoryStore.delegate = self
     }
     
     // MARK: - Setup
@@ -152,6 +158,16 @@ final class TrackerStore: NSObject {
     }
     
     // MARK: - Pin Methods
+    func updateTrackersCategory(from oldCategory: String, to newCategory: String) throws {
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "categoryTitle == %@", oldCategory)
+        
+        let trackersToUpdate = try context.fetch(request)
+        for tracker in trackersToUpdate {
+            tracker.categoryTitle = newCategory
+        }
+    }
+    
     func togglePin(for trackerId: UUID) throws {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(
@@ -199,10 +215,10 @@ final class TrackerStore: NSObject {
     
     func updateTracker(_ tracker: Tracker) throws {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-            request.predicate = NSPredicate(
-                format: "idTrackers == %@",
-                tracker.idTrackers as CVarArg
-            )
+        request.predicate = NSPredicate(
+            format: "idTrackers == %@",
+            tracker.idTrackers as CVarArg
+        )
         
         if let trackerCoreData = try context.fetch(request).first {
             trackerCoreData.nameTrackers = tracker.name
@@ -312,6 +328,19 @@ final class TrackerStore: NSObject {
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.didUpdateTrackers()
+    }
+}
+
+// MARK: - TrackerCategoryStoreDelegate
+extension TrackerStore: TrackerCategoryStoreDelegate {
+    func didUpdateCategories() {
+        // При изменении категорий принудительно перезагружаем FRC
+        do {
+            try fetchedResultsController.performFetch()
+            delegate?.didUpdateTrackers()
+        } catch {
+            print("❌ Error reloading trackers after category update: \(error)")
+        }
     }
 }
 

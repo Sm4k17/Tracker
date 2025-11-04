@@ -12,6 +12,7 @@ final class AddCategoryViewController: UIViewController {
     // MARK: - Constants
     private enum Constants {
         static let navigationTitle = R.string.localizable.new_category()
+        static let editNavigationTitle = "Редактирование категории"
         static let textFieldPlaceholder = R.string.localizable.enter_category_name()
         static let readyButtonTitle = R.string.localizable.ready()
         
@@ -32,6 +33,7 @@ final class AddCategoryViewController: UIViewController {
         textField.leftViewMode = .always
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
+        textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
         
@@ -64,6 +66,7 @@ final class AddCategoryViewController: UIViewController {
     
     // MARK: - Properties
     private let onCategoryCreated: (String) -> Void
+    private var isEditingMode: Bool = false
     
     // MARK: - Initializer
     init(onCategoryCreated: @escaping (String) -> Void) {
@@ -81,7 +84,7 @@ final class AddCategoryViewController: UIViewController {
         setupUI()
         setupTapGesture()
         AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": "AddCategory",
+            "screen_name": isEditingMode ? "EditCategory" : "AddCategory",
             "screen_class": String(describing: type(of: self))
         ])
     }
@@ -99,8 +102,16 @@ final class AddCategoryViewController: UIViewController {
         setupConstraints()
     }
     
+    // MARK: - Public Methods
+    func setExistingCategoryName(_ name: String) {
+        categoryTextField.text = name
+        updateReadyButtonState()
+        isEditingMode = true
+        setupNavigationBar() // Обновляем заголовок после установки режима редактирования
+    }
+    
     private func setupNavigationBar() {
-        title = Constants.navigationTitle
+        title = isEditingMode ? Constants.editNavigationTitle : Constants.navigationTitle
         navigationItem.hidesBackButton = true
         navigationItem.leftBarButtonItem = nil
     }
@@ -143,14 +154,14 @@ final class AddCategoryViewController: UIViewController {
             return
         }
         
-        AnalyticsService.shared.report(event: "category_created", params: [
+        AnalyticsService.shared.report(event: isEditingMode ? "category_edited" : "category_created", params: [
             "category_name_length": categoryName.count,
-            "screen": "add_category"
+            "screen": isEditingMode ? "edit_category" : "add_category"
         ])
         
-        // Вызываем колбэк и возвращаемся назад со стандартной анимацией
+        // Вызываем колбэк и закрываем модальное окно
         onCategoryCreated(categoryName)
-        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
     
     private func updateReadyButtonState() {
@@ -159,5 +170,15 @@ final class AddCategoryViewController: UIViewController {
         
         readyButton.isEnabled = !isEmpty
         readyButton.backgroundColor = isEmpty ? .ypGray : .ypBlack
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension AddCategoryViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if readyButton.isEnabled {
+            createCategory()
+        }
+        return true
     }
 }

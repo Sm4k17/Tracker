@@ -82,11 +82,15 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
+    private var trackerToEdit: Tracker?
+    private var editingCategory: String = ""
     
     // MARK: - Initializer
-    init(delegate: TrackerViewControllerDelegate?) {
-        self.delegate = delegate
+    init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
+        self.trackerToEdit = trackerToEdit
+        self.editingCategory = trackerToEdit?.category ?? ""
         super.init(nibName: nil, bundle: nil)
+        self.delegate = delegate
     }
     
     required init?(coder: NSCoder) {
@@ -102,6 +106,9 @@ final class CreationTrackerViewController: UIViewController {
             "screen_name": "CreationTracker",
             "screen_class": String(describing: type(of: self))
         ])
+        if let tracker = trackerToEdit {
+            setupForEditing(tracker)
+        }
     }
     
     // MARK: - Setup
@@ -109,6 +116,28 @@ final class CreationTrackerViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupViews()
         setupConstraints()
+    }
+    
+    private func setupForEditing(_ tracker: Tracker) {
+        title = "Редактирование"
+        // Заполняем данные трекера для редактирования
+        // В зависимости от типа трекера (привычка или событие)
+        // переходим в соответствующий контроллер конфигурации
+        if tracker.scheduleTrackers.isEmpty {
+            // Нерегулярное событие
+            let eventVC = EventConfigurationViewController(
+                trackerToEdit: tracker,
+                delegate: delegate
+            )
+            navigationController?.pushViewController(eventVC, animated: false)
+        } else {
+            // Привычка
+            let habitVC = HabitConfigurationViewController(
+                trackerToEdit: tracker,
+                delegate: delegate
+            )
+            navigationController?.pushViewController(habitVC, animated: false)
+        }
     }
     
     private func setupNavigationBar() {

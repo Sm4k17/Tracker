@@ -93,13 +93,36 @@ final class TrackerCategoryStore: NSObject {
         try context.save()
     }
     
+    // MARK: - New Methods for Context Menu
+    func updateCategory(from oldName: String, to newName: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", oldName)
+        
+        if let categoryToUpdate = try context.fetch(request).first {
+            categoryToUpdate.title = newName
+            try context.save()
+        } else {
+            throw NSError(domain: "CategoryStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Категория не найдена"])
+        }
+    }
+    
     func deleteCategory(title: String) throws {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
         
         if let categoryToDelete = try context.fetch(request).first {
+            // Удаляем все трекеры в этой категории
+            if let trackers = categoryToDelete.trackers as? Set<TrackerCoreData> {
+                for tracker in trackers {
+                    context.delete(tracker)
+                }
+            }
+            
+            // Удаляем саму категорию
             context.delete(categoryToDelete)
             try context.save()
+        } else {
+            throw NSError(domain: "CategoryStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Категория не найдена"])
         }
     }
     
@@ -122,6 +145,20 @@ final class TrackerCategoryStore: NSObject {
         
         guard let category = try? context.fetch(request).first else { return true }
         return (category.trackers?.count ?? 0) == 0
+    }
+    
+    // MARK: - Validation Methods
+    func isCategoryNameUnique(_ name: String) -> Bool {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", name)
+        
+        do {
+            let existingCategories = try context.fetch(request)
+            return existingCategories.isEmpty
+        } catch {
+            print("❌ Error checking category uniqueness: \(error)")
+            return false
+        }
     }
 }
 

@@ -83,6 +83,14 @@ final class EmojiSelectionView: UIView {
     }
     
     // MARK: - Public Methods
+    func selectEmoji(_ emoji: String) {
+        if let index = Constants.emojis.firstIndex(of: emoji) {
+            let indexPath = IndexPath(item: index, section: 0)
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: .centeredVertically)
+            collectionView(collectionView, didSelectItemAt: indexPath)
+        }
+    }
+    
     func setSelectedEmoji(_ emoji: String) {
         let oldSelectedEmoji = selectedEmoji
         selectedEmoji = emoji
@@ -212,4 +220,5 @@ private final class EmojiCell: UICollectionViewCell {
         emojiLabel.text = emoji
         selectionView.isHidden = !isSelected
     }
+    
 }

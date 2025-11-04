@@ -8,117 +8,20 @@
 import UIKit
 
 // MARK: - Habit Configuration View Controller
-final class HabitConfigurationViewController: UIViewController {
+final class HabitConfigurationViewController: BaseTrackerConfigurationViewController {
     
-    // MARK: - Constants
-    private enum Constants {
-        static let navigationTitle = R.string.localizable.new_habit()
-        static let cancelButtonTitle = R.string.localizable.cancel()
-        static let createButtonTitle = R.string.localizable.create()
-        
-        static let namePlaceholder = R.string.localizable.enter_tracker_name()
-        static let categoryTitle = R.string.localizable.category()
-        static let categorySubtitle = ""
+    // MARK: - Habit-specific Constants
+    private enum HabitConstants {
         static let scheduleTitle = R.string.localizable.schedule()
         static let scheduleSubtitle = ""
-        static let emojiTitle = R.string.localizable.emoji()
-        static let colorTitle = R.string.localizable.color()
-        static let symbolsLimitMessage = R.string.localizable.symbols_limit()
-        static let symbolsLimit = 38
         
-        // Константы для размеров и отступов
         enum Layout {
-            static let horizontalInset: CGFloat = 16
-            static let buttonHeight: CGFloat = 60
-            static let cornerRadius: CGFloat = 16
-            static let textFieldHeight: CGFloat = 75
             static let separatorHeight: CGFloat = 0.5
-            static let dropdownItemHeight: CGFloat = 75
             static let separatorInset: CGFloat = 16
-            static let symbolsLimitLabelHeight: CGFloat = 22
-            
-            // Используем унифицированные высоты коллекций
-            static var emojiCollectionHeight: CGFloat {
-                return EmojiSelectionView.Layout.calculateCollectionHeight(
-                    itemCount: EmojiSelectionView.Constants.emojis.count
-                )
-            }
-            
-            static var colorCollectionHeight: CGFloat {
-                return ColorSelectionView.Layout.calculateCollectionHeight(
-                    itemCount: ColorSelectionView.Constants.colors.count
-                )
-            }
-        }
-        
-        // Шрифты
-        enum Fonts {
-            static let sectionTitle: UIFont = .systemFont(ofSize: 19, weight: .bold)
-            static let button: UIFont = .systemFont(ofSize: 16, weight: .medium)
-            static let dropdownTitle: UIFont = .systemFont(ofSize: 16, weight: .regular)
-            static let dropdownSubtitle: UIFont = .systemFont(ofSize: 16, weight: .regular)
-        }
-        
-        // Цвета
-        enum Colors {
-            static let sectionTitle: UIColor = .ypBlack
-            static let buttonText: UIColor = .ypWhite
-            static let cancelButtonText: UIColor = .ypRed
-            static let dropdownTitle: UIColor = .ypBlack
-            static let dropdownSubtitle: UIColor = .ypGray
-            static let dropdownBackground: UIColor = .ypBackground
-            static let separatorColor: UIColor = .ypGray
         }
     }
     
-    // MARK: - UI Components
-    private lazy var scrollView: UIScrollView = {
-        let scroll = UIScrollView()
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        return scroll
-    }()
-    
-    private lazy var contentStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = 24
-        stack.isLayoutMarginsRelativeArrangement = true
-        stack.layoutMargins = UIEdgeInsets(top: 24, left: Constants.Layout.horizontalInset,
-                                           bottom: 24, right: Constants.Layout.horizontalInset)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    private lazy var nameTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = Constants.namePlaceholder
-        textField.backgroundColor = .ypBackground
-        textField.layer.cornerRadius = Constants.Layout.cornerRadius
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
-        textField.leftViewMode = .always
-        textField.clearButtonMode = .whileEditing
-        textField.heightAnchor.constraint(equalToConstant: Constants.Layout.textFieldHeight).isActive = true
-        
-        textField.addAction(UIAction { [weak self] _ in
-            self?.updateCreateButtonState()
-        }, for: .editingChanged)
-        
-        return textField
-    }()
-    
-    private lazy var symbolsLimitLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .regular)
-        label.textColor = .ypRed
-        label.text = Constants.symbolsLimitMessage
-        label.textAlignment = .center
-        label.isHidden = true
-        label.alpha = 0
-        label.heightAnchor.constraint(equalToConstant: Constants.Layout.symbolsLimitLabelHeight).isActive = true
-        return label
-    }()
-    
-    // Вертикальный стек для категории и расписания
+    // MARK: - Habit-specific UI Components
     private lazy var categoryScheduleStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
@@ -126,22 +29,14 @@ final class HabitConfigurationViewController: UIViewController {
         stack.backgroundColor = Constants.Colors.dropdownBackground
         stack.layer.cornerRadius = Constants.Layout.cornerRadius
         stack.layer.masksToBounds = true
+        stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
-    }()
-    
-    private lazy var categoryButton: UIButton = {
-        createDropdownButton(
-            title: Constants.categoryTitle,
-            subtitle: Constants.categorySubtitle
-        ) { [weak self] in
-            self?.didTapCategoryButton()
-        }
     }()
     
     private lazy var scheduleButton: UIButton = {
         createDropdownButton(
-            title: Constants.scheduleTitle,
-            subtitle: Constants.scheduleSubtitle
+            title: HabitConstants.scheduleTitle,
+            subtitle: HabitConstants.scheduleSubtitle
         ) { [weak self] in
             self?.didTapScheduleButton()
         }
@@ -149,86 +44,42 @@ final class HabitConfigurationViewController: UIViewController {
     
     private lazy var separatorView: UIView = {
         let view = UIView()
-        view.backgroundColor = Constants.Colors.separatorColor
+        view.backgroundColor = .ypGray
         
         let container = UIView()
         container.addSubview(view)
         view.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: Constants.Layout.separatorInset),
-            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -Constants.Layout.separatorInset),
+            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: HabitConstants.Layout.separatorInset),
+            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -HabitConstants.Layout.separatorInset),
             view.topAnchor.constraint(equalTo: container.topAnchor),
             view.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            view.heightAnchor.constraint(equalToConstant: Constants.Layout.separatorHeight)
+            view.heightAnchor.constraint(equalToConstant: HabitConstants.Layout.separatorHeight)
         ])
         
         return container
     }()
     
-    private lazy var emojiSelectionView: EmojiSelectionView = {
-        let view = EmojiSelectionView()
-        view.delegate = self
-        return view
-    }()
-    
-    private lazy var colorSelectionView: ColorSelectionView = {
-        let view = ColorSelectionView()
-        view.delegate = self
-        return view
-    }()
-    
-    private lazy var buttonsStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 8
-        stack.distribution = .fillEqually
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    private lazy var cancelButton: UIButton = {
-        createActionButton(
-            title: Constants.cancelButtonTitle,
-            backgroundColor: .clear,
-            titleColor: Constants.Colors.cancelButtonText,
-            borderColor: .ypRed
-        ) { [weak self] in
-            self?.didTapCancelButton()
-        }
-    }()
-    
-    private lazy var createButton: UIButton = {
-        createActionButton(
-            title: Constants.createButtonTitle,
-            backgroundColor: .ypGray,
-            titleColor: Constants.Colors.buttonText
-        ) { [weak self] in
-            self?.didTapCreateButton()
-        }
-    }()
-    
-    private lazy var emojiLabel: UILabel = {
-        createSectionLabel(text: Constants.emojiTitle)
-    }()
-    
-    private lazy var colorLabel: UILabel = {
-        createSectionLabel(text: Constants.colorTitle)
-    }()
-    
-    // MARK: - Properties
-    private weak var delegate: TrackerViewControllerDelegate?
-    private var selectedCategory: String = ""
+    // MARK: - Habit-specific Properties
     private var selectedSchedule: Set<Week> = []
-    private var selectedEmoji: String = ""
-    private var selectedColor: UIColor = .systemRed
-    private var showWarningAnimationStarted = false
-    private var hideWarningAnimationStarted = false
+    
+    // MARK: - Override Properties
+    override var navigationTitle: String {
+        return trackerToEdit != nil ? "Редактирование привычки" : R.string.localizable.new_habit()
+    }
+    
+    override var createButtonTitle: String {
+        return trackerToEdit != nil ? "Сохранить" : R.string.localizable.create()
+    }
     
     // MARK: - Initializer
-    init(delegate: TrackerViewControllerDelegate?) {
-        self.delegate = delegate
-        super.init(nibName: nil, bundle: nil)
+    override init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
+        super.init(trackerToEdit: trackerToEdit, delegate: delegate)
+        
+        if let tracker = trackerToEdit {
+            setupHabitEditingData(tracker)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -238,29 +89,14 @@ final class HabitConfigurationViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        setupNavigationBar()
-        setupTapGesture()
-        updateCreateButtonState()
+        AnalyticsService.shared.report(event: "screen_opened", params: [
+            "screen_name": "HabitConfiguration",
+            "screen_class": String(describing: type(of: self))
+        ])
     }
     
-    // MARK: - Setup
-    private func setupUI() {
-        view.backgroundColor = .ypWhite
-        setupViews()
-        setupConstraints()
-    }
-    
-    private func setupNavigationBar() {
-        title = Constants.navigationTitle
-        navigationItem.hidesBackButton = true
-        navigationItem.leftBarButtonItem = nil
-    }
-    
-    private func setupViews() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentStackView)
-        
+    // MARK: - Override Setup Methods
+    override func setupContentStack() {
         [nameTextField, symbolsLimitLabel, categoryScheduleStack, emojiLabel,
          emojiSelectionView, colorLabel, colorSelectionView].forEach {
             contentStackView.addArrangedSubview($0)
@@ -268,151 +104,51 @@ final class HabitConfigurationViewController: UIViewController {
         
         updateSpacing()
         
-        // Добавляем кнопки и разделитель в стек
+        // Настраиваем стек категории и расписания
         categoryScheduleStack.addArrangedSubview(categoryButton)
         categoryScheduleStack.addArrangedSubview(separatorView)
         categoryScheduleStack.addArrangedSubview(scheduleButton)
         
         categoryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
-        separatorView.heightAnchor.constraint(equalToConstant: Constants.Layout.separatorHeight).isActive = true
+        separatorView.heightAnchor.constraint(equalToConstant: HabitConstants.Layout.separatorHeight).isActive = true
         scheduleButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+    }
+    
+    override func setupViews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentStackView)
         
-        // Добавляем стек с кнопками отдельно от скролла
-        view.addSubview(buttonsStackView)
-        buttonsStackView.addArrangedSubview(cancelButton)
-        buttonsStackView.addArrangedSubview(createButton)
+        setupContentStack()
         
         emojiSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.emojiCollectionHeight).isActive = true
         colorSelectionView.heightAnchor.constraint(equalToConstant: Constants.Layout.colorCollectionHeight).isActive = true
         
-        [emojiLabel, colorLabel, emojiSelectionView, colorSelectionView,
-         categoryButton, scheduleButton].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        view.addSubview(buttonsStackView)
+        buttonsStackView.addArrangedSubview(cancelButton)
+        buttonsStackView.addArrangedSubview(createButton)
     }
     
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -16),
-            
-            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            
-            buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.Layout.horizontalInset),
-            buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.Layout.horizontalInset),
-            buttonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            buttonsStackView.heightAnchor.constraint(equalToConstant: Constants.Layout.buttonHeight)
-        ])
+    // MARK: - Habit-specific Setup
+    private func setupHabitEditingData(_ tracker: Tracker) {
+        selectedSchedule = tracker.scheduleTrackers
+        let scheduleText = formatScheduleText(tracker.scheduleTrackers)
+        updateScheduleButtonSubtitle(scheduleText)
     }
     
-    private func setupTapGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-    
-    // MARK: - Actions
-    @objc private func handleTap() {
-        view.endEditing(true)
-    }
-    
-    // MARK: - Factory Methods
-    private func createSectionLabel(text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.font = Constants.Fonts.sectionTitle
-        label.textColor = Constants.Colors.sectionTitle
-        return label
-    }
-    
-    private func createDropdownButton(title: String, subtitle: String, action: @escaping () -> Void) -> UIButton {
-        let button = UIButton(type: .system)
-        button.backgroundColor = .clear
-        button.contentHorizontalAlignment = .left
-        button.layer.masksToBounds = true
-        
-        // Создаем вертикальный стек для заголовка и подзаголовка
-        let textStack = UIStackView()
-        textStack.axis = .vertical
-        textStack.spacing = 2
-        textStack.alignment = .leading
-        
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.font = Constants.Fonts.dropdownTitle
-        titleLabel.textColor = Constants.Colors.dropdownTitle
-        
-        let subtitleLabel = UILabel()
-        subtitleLabel.text = subtitle
-        subtitleLabel.font = Constants.Fonts.dropdownSubtitle
-        subtitleLabel.textColor = Constants.Colors.dropdownSubtitle
-        
-        textStack.addArrangedSubview(titleLabel)
-        textStack.addArrangedSubview(subtitleLabel)
-        
-        button.addSubview(textStack)
-        
-        let arrowImageView = UIImageView()
-        arrowImageView.image = R.image.chevron()
-        arrowImageView.tintColor = .ypGray
-        button.addSubview(arrowImageView)
-        
-        textStack.translatesAutoresizingMaskIntoConstraints = false
-        arrowImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            textStack.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-            textStack.leadingAnchor.constraint(equalTo: button.leadingAnchor, constant: 16),
-            textStack.trailingAnchor.constraint(equalTo: arrowImageView.leadingAnchor, constant: -8),
-            
-            arrowImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-            arrowImageView.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -16),
-            arrowImageView.widthAnchor.constraint(equalToConstant: 12),
-            arrowImageView.heightAnchor.constraint(equalToConstant: 12)
-        ])
-        
-        button.addAction(UIAction { _ in action() }, for: .touchUpInside)
-        
-        return button
-    }
-    
-    private func createActionButton(
-        title: String,
-        backgroundColor: UIColor,
-        titleColor: UIColor,
-        borderColor: UIColor? = nil,
-        action: @escaping () -> Void
-    ) -> UIButton {
-        let button = UIButton(type: .system)
-        button.setTitle(title, for: .normal)
-        button.titleLabel?.font = Constants.Fonts.button
-        button.backgroundColor = backgroundColor
-        button.setTitleColor(titleColor, for: .normal)
-        button.layer.cornerRadius = Constants.Layout.cornerRadius
-        button.layer.masksToBounds = true
-        
-        if let borderColor = borderColor {
-            button.layer.borderWidth = 1
-            button.layer.borderColor = borderColor.cgColor
-        }
-        
-        button.addAction(UIAction { _ in action() }, for: .touchUpInside)
-        
-        return button
+    override func setupEditingData(_ tracker: Tracker) {
+        super.setupEditingData(tracker)
+        setupHabitEditingData(tracker)
     }
     
     // MARK: - Helper Methods
-    private func updateCategoryButtonSubtitle(_ subtitle: String) {
-        if let textStack = categoryButton.subviews.first(where: { $0 is UIStackView }) as? UIStackView,
-           let subtitleLabel = textStack.arrangedSubviews.last as? UILabel {
-            subtitleLabel.text = subtitle
-            subtitleLabel.textColor = Constants.Colors.dropdownSubtitle
+    private func formatScheduleText(_ schedule: Set<Week>) -> String {
+        if schedule.isEmpty {
+            return ""
+        } else if schedule.count == 7 {
+            return R.string.localizable.every_day()
+        } else {
+            let sortedDays = schedule.sorted { $0.rawValue < $1.rawValue }
+            return sortedDays.map { $0.localizedShortTitle }.joined(separator: ", ")
         }
     }
     
@@ -424,78 +160,12 @@ final class HabitConfigurationViewController: UIViewController {
         }
     }
     
-    // MARK: - Dynamic Spacing Methods
-    private func updateSpacing() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            if self.symbolsLimitLabel.isHidden {
-                // Когда warning скрыт - 24pt между полем и категорией
-                self.contentStackView.setCustomSpacing(24, after: self.nameTextField)
-            } else {
-                // Когда warning виден - 8pt между полем и warning, 24pt между warning и категорией
-                self.contentStackView.setCustomSpacing(8, after: self.nameTextField)
-                self.contentStackView.setCustomSpacing(24, after: self.symbolsLimitLabel)
-            }
-        }
-    }
-    
-    // MARK: - Symbols Limit Methods
-    private func checkSymbolsLimit() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let symbolsCount = self.nameTextField.text?.count ?? 0
-            symbolsCount > Constants.symbolsLimit ? self.showSymbolsLimitLabel() : self.hideSymbolsLimitLabel()
-        }
-    }
-    
-    private func showSymbolsLimitLabel() {
-        guard !showWarningAnimationStarted && symbolsLimitLabel.isHidden && !hideWarningAnimationStarted else { return }
-        showWarningAnimationStarted = true
+    // MARK: - Override Action Methods
+    override func didTapCategoryButton() {
+        AnalyticsService.shared.report(event: "category_selection_opened", params: [
+            "screen": "habit_configuration"
+        ])
         
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            
-            self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
-            self.symbolsLimitLabel.isHidden = false
-            
-            // ОБНОВИТЬ SPACING ПЕРЕД АНИМАЦИЕЙ
-            self.updateSpacing()
-            
-            UIView.animate(withDuration: 0.3, animations: {
-                self.symbolsLimitLabel.transform = .identity
-                self.symbolsLimitLabel.alpha = 1
-                self.view.layoutIfNeeded()
-            }, completion: { _ in
-                self.showWarningAnimationStarted = false
-            })
-        }
-    }
-    
-    private func hideSymbolsLimitLabel() {
-        guard !hideWarningAnimationStarted && !symbolsLimitLabel.isHidden && !showWarningAnimationStarted else { return }
-        hideWarningAnimationStarted = true
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            
-            UIView.animate(withDuration: 0.5, animations: {
-                self.symbolsLimitLabel.alpha = 0
-                self.symbolsLimitLabel.transform = CGAffineTransform(translationX: 0, y: -10)
-                self.view.layoutIfNeeded()
-            }) { _ in
-                self.symbolsLimitLabel.isHidden = true
-                self.symbolsLimitLabel.transform = .identity
-                
-                // ОБНОВИТЬ SPACING ПОСЛЕ СКРЫТИЯ
-                self.updateSpacing()
-                
-                self.hideWarningAnimationStarted = false
-            }
-        }
-    }
-    
-    // MARK: - Actions
-    private func didTapCategoryButton() {
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
             self?.selectedCategory = category
             self?.updateCategoryButtonSubtitle(category)
@@ -504,27 +174,11 @@ final class HabitConfigurationViewController: UIViewController {
         navigationController?.pushViewController(categoryVC, animated: true)
     }
     
-    private func didTapScheduleButton() {
-        let scheduleVC = ScheduleSelectionViewController(selectedDays: selectedSchedule) { [weak self] schedule in
-            self?.selectedSchedule = schedule
-            let scheduleText: String
-            
-            if schedule.isEmpty {
-                scheduleText = ""
-            } else if schedule.count == 7 {
-                scheduleText = R.string.localizable.every_day()
-            } else {
-                let sortedDays = schedule.sorted { $0.rawValue < $1.rawValue }
-                scheduleText = sortedDays.map { $0.localizedShortTitle }.joined(separator: ", ")
-            }
-            
-            self?.updateScheduleButtonSubtitle(scheduleText)
-            self?.updateCreateButtonState()
-        }
-        navigationController?.pushViewController(scheduleVC, animated: true)
-    }
-    
-    private func didTapCancelButton() {
+    override func didTapCancelButton() {
+        AnalyticsService.shared.report(event: "habit_creation_cancelled", params: [
+            "screen": "habit_configuration"
+        ])
+        
         if let creationVC = navigationController?.viewControllers.first(where: { $0 is CreationTrackerViewController }) {
             navigationController?.popToViewController(creationVC, animated: true)
         } else {
@@ -532,7 +186,7 @@ final class HabitConfigurationViewController: UIViewController {
         }
     }
     
-    private func didTapCreateButton() {
+    override func didTapCreateButton() {
         guard let trackerName = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trackerName.isEmpty else {
             showError(message: "Введите название привычки")
@@ -565,29 +219,76 @@ final class HabitConfigurationViewController: UIViewController {
             return
         }
         
-        let habit = Tracker(
-            idTrackers: UUID(),
-            name: trackerName,
-            color: selectedColor,
-            emoji: selectedEmoji,
-            scheduleTrackers: selectedSchedule,
-            category: selectedCategory
-        )
+        let tracker: Tracker
+        if let existingTracker = trackerToEdit {
+            // Редактируем существующий трекер
+            tracker = Tracker(
+                idTrackers: existingTracker.idTrackers,
+                name: trackerName,
+                color: selectedColor,
+                emoji: selectedEmoji,
+                scheduleTrackers: selectedSchedule,
+                category: selectedCategory,
+                isPinned: existingTracker.isPinned
+            )
+            
+            AnalyticsService.shared.report(event: "tracker_edited", params: [
+                "tracker_id": tracker.idTrackers.uuidString,
+                "tracker_type": "habit",
+                "category": tracker.category
+            ])
+        } else {
+            // Создаем новый трекер
+            tracker = Tracker(
+                idTrackers: UUID(),
+                name: trackerName,
+                color: selectedColor,
+                emoji: selectedEmoji,
+                scheduleTrackers: selectedSchedule,
+                category: selectedCategory
+            )
+            
+            AnalyticsService.shared.report(event: "tracker_created", params: [
+                "tracker_id": tracker.idTrackers.uuidString,
+                "tracker_type": "habit",
+                "category": tracker.category
+            ])
+        }
         
-        delegate?.didCreateNewTracker(habit, categoryTitle: selectedCategory)
+        if trackerToEdit != nil {
+            delegate?.didUpdateTracker(tracker, categoryTitle: selectedCategory)
+        } else {
+            delegate?.didCreateNewTracker(tracker, categoryTitle: selectedCategory)
+        }
     }
     
-    private func showError(message: String) {
-        AnalyticsService.shared.report(event: "error_occurred", params: [
-            "error_message": message,
-            "screen": "trackers_main"
+    // MARK: - Habit-specific Actions
+    private func didTapScheduleButton() {
+        AnalyticsService.shared.report(event: "schedule_selection_opened", params: [
+            "screen": "habit_configuration"
         ])
-        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        
+        let scheduleVC = ScheduleSelectionViewController(selectedDays: selectedSchedule) { [weak self] schedule in
+            self?.selectedSchedule = schedule
+            let scheduleText: String
+            
+            if schedule.isEmpty {
+                scheduleText = ""
+            } else if schedule.count == 7 {
+                scheduleText = R.string.localizable.every_day()
+            } else {
+                let sortedDays = schedule.sorted { $0.rawValue < $1.rawValue }
+                scheduleText = sortedDays.map { $0.localizedShortTitle }.joined(separator: ", ")
+            }
+            
+            self?.updateScheduleButtonSubtitle(scheduleText)
+            self?.updateCreateButtonState()
+        }
+        navigationController?.pushViewController(scheduleVC, animated: true)
     }
     
-    private func updateCreateButtonState() {
+    // MARK: - Override Validation
+    override func updateCreateButtonState() {
         checkSymbolsLimit()
         
         let text = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -606,22 +307,6 @@ final class HabitConfigurationViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             self?.checkSymbolsLimit()
         }
-    }
-}
-
-// MARK: - EmojiSelectionDelegate
-extension HabitConfigurationViewController: EmojiSelectionDelegate {
-    func didSelectEmoji(_ emoji: String) {
-        selectedEmoji = emoji
-        updateCreateButtonState()
-    }
-}
-
-// MARK: - ColorSelectionDelegate
-extension HabitConfigurationViewController: ColorSelectionDelegate {
-    func didSelectColor(_ color: UIColor) {
-        selectedColor = color
-        updateCreateButtonState()
     }
 }
 

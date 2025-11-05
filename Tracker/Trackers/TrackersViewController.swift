@@ -116,6 +116,49 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    private func setupDatePickerObserver() {
+        // Даем DatePicker полностью настроиться
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+            
+            // Наблюдаем за изменениями в DatePicker
+            self.datePicker.addObserver(self, forKeyPath: "date", options: [.new, .old], context: nil)
+            
+            // Наблюдаем за изменениями текста в UILabel
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                self?.checkDatePickerTextColor()
+            }
+        }
+    }
+    
+    private func checkDatePickerTextColor() {
+        if let label = self.datePicker.subviews.first?
+            .subviews.first?
+            .subviews.first?
+            .subviews[1]
+            .subviews.first as? UILabel {
+            
+            // Если цвет не черный - исправляем и логируем
+            if label.textColor != .ypBlackD {
+                print("🚨 Цвет изменился: \(label.textColor!) -> черный, текст: '\(label.text ?? "")'")
+                label.textColor = .ypBlackD
+            }
+        }
+    }
+    
+    // KVO для отслеживания изменений даты
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "date" {
+            print("📅 Дата изменилась: \(datePicker.date)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                self?.checkDatePickerTextColor()
+            }
+        }
+    }
+    
+    deinit {
+        datePicker.removeObserver(self, forKeyPath: "date")
+    }
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .ypWhite
@@ -219,6 +262,15 @@ final class TrackersViewController: UIViewController {
         datePicker.preferredDatePickerStyle = .compact
         datePicker.locale = Locale.current
         datePicker.tintColor = .ypBlack
+        
+        // Устанавливаем только фон (цвет текста теперь делает observer)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            guard let self = self else { return }
+            
+            // Фон
+            self.datePicker.subviews.first?.subviews.first?.subviews.first?.subviews.first?.subviews.first?.backgroundColor = UIColor(red: 0.94, green: 0.94, blue: 0.94, alpha: 1.0)
+        }
+        
         datePicker.addAction(UIAction { [weak self] _ in
             self?.dateChanged(self?.datePicker)
         }, for: .valueChanged)
@@ -243,6 +295,8 @@ final class TrackersViewController: UIViewController {
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = Constants.searchPlaceholder
         searchController.searchBar.delegate = self
+        
+        setupDatePickerObserver()
     }
     
     private func setupConstraints() {

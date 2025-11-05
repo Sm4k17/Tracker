@@ -102,10 +102,6 @@ final class CreationTrackerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
-        AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": "CreationTracker",
-            "screen_class": String(describing: type(of: self))
-        ])
         if let tracker = trackerToEdit {
             setupForEditing(tracker)
         }
@@ -178,17 +174,19 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Actions
     private func regularTrackerButtonTapped() {
-        AnalyticsService.shared.report(event: "tracker_creation_started", params: [
-            "tracker_type": "habit",
-            "screen": "creation_choice"
+        // Аналитика: выбор привычки
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "TrackerType",
+            "item": "habit"
         ])
         navigateToTrackerCreation(isRegular: true)
     }
     
     private func irregularTrackerButtonTapped() {
-        AnalyticsService.shared.report(event: "tracker_creation_started", params: [
-            "tracker_type": "event",
-            "screen": "creation_choice"
+        // Аналитика: выбор события
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "TrackerType",
+            "item": "event"
         ])
         navigateToTrackerCreation(isRegular: false)
     }

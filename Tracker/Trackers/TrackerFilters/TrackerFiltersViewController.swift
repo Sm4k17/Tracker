@@ -39,6 +39,21 @@ final class TrackerFiltersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        // Аналитика: открытие экрана фильтров
+        AnalyticsService.shared.report(event: "open", params: [
+            "screen": "Filters"
+        ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if isMovingFromParent {
+            // Аналитика: закрытие экрана фильтров
+            AnalyticsService.shared.report(event: "close", params: [
+                "screen": "Filters"
+            ])
+        }
     }
     
     private func setupUI() {
@@ -91,6 +106,12 @@ extension TrackerFiltersViewController: UITableViewDelegate {
         case 3: newFilter = .uncompleted
         default: newFilter = .all
         }
+        
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Filters",
+            "item": "apply_filter",
+            "filter_type": newFilter
+        ])
         
         // Передаем выбранный фильтр, даже если он тот же самый
         onFilterSelected?(newFilter)

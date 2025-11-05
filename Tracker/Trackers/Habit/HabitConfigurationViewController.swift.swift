@@ -89,10 +89,22 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": "HabitConfiguration",
-            "screen_class": String(describing: type(of: self))
+        // Аналитика: открытие экрана создания
+        let screenName = trackerToEdit != nil ? "EditHabit" : "NewHabit"
+        AnalyticsService.shared.report(event: "open", params: [
+            "screen": screenName
         ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if isMovingFromParent {
+            let screenName = trackerToEdit != nil ? "EditHabit" : "NewHabit"
+            AnalyticsService.shared.report(event: "close", params: [
+                "screen": screenName
+            ])
+        }
     }
     
     // MARK: - Override Setup Methods
@@ -162,10 +174,6 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Action Methods
     override func didTapCategoryButton() {
-        AnalyticsService.shared.report(event: "category_selection_opened", params: [
-            "screen": "habit_configuration"
-        ])
-        
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
             self?.selectedCategory = category
             self?.updateCategoryButtonSubtitle(category)
@@ -175,10 +183,6 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     override func didTapCancelButton() {
-        AnalyticsService.shared.report(event: "habit_creation_cancelled", params: [
-            "screen": "habit_configuration"
-        ])
-        
         if let creationVC = navigationController?.viewControllers.first(where: { $0 is CreationTrackerViewController }) {
             navigationController?.popToViewController(creationVC, animated: true)
         } else {
@@ -187,6 +191,12 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     override func didTapCreateButton() {
+        // Аналитика: создание/сохранение трекера
+        let action = trackerToEdit != nil ? "save" : "create"
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "NewHabit",
+            "item": action
+        ])
         guard let trackerName = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trackerName.isEmpty else {
             showError(message: "Введите название привычки")
@@ -232,11 +242,6 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
                 isPinned: existingTracker.isPinned
             )
             
-            AnalyticsService.shared.report(event: "tracker_edited", params: [
-                "tracker_id": tracker.idTrackers.uuidString,
-                "tracker_type": "habit",
-                "category": tracker.category
-            ])
         } else {
             // Создаем новый трекер
             tracker = Tracker(
@@ -248,11 +253,6 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
                 category: selectedCategory
             )
             
-            AnalyticsService.shared.report(event: "tracker_created", params: [
-                "tracker_id": tracker.idTrackers.uuidString,
-                "tracker_type": "habit",
-                "category": tracker.category
-            ])
         }
         
         if trackerToEdit != nil {
@@ -264,9 +264,6 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Habit-specific Actions
     private func didTapScheduleButton() {
-        AnalyticsService.shared.report(event: "schedule_selection_opened", params: [
-            "screen": "habit_configuration"
-        ])
         
         let scheduleVC = ScheduleSelectionViewController(selectedDays: selectedSchedule) { [weak self] schedule in
             self?.selectedSchedule = schedule

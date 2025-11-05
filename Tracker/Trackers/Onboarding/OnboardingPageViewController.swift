@@ -127,12 +127,6 @@ final class OnboardingPageViewController: UIViewController {
     // MARK: - Actions
     private func didTapActionButton() {
         
-        // Аналитика: завершение онбординга
-        AnalyticsService.shared.report(event: "onboarding_completed", params: [
-            "screen": "onboarding",
-            "action": "complete"
-        ])
-        
         // Сохраняем факт прохождения онбординга
         OnboardingStorage.isOnboardingCompleted = true
         

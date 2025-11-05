@@ -83,10 +83,6 @@ final class AddCategoryViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTapGesture()
-        AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": isEditingMode ? "EditCategory" : "AddCategory",
-            "screen_class": String(describing: type(of: self))
-        ])
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -145,6 +141,12 @@ final class AddCategoryViewController: UIViewController {
     }
     
     private func didTapReadyButton() {
+        // Аналитика: сохранение категории
+        let action = isEditingMode ? "save_category" : "create_category"
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "AddCategory",
+            "item": action
+        ])
         createCategory()
     }
     
@@ -153,11 +155,6 @@ final class AddCategoryViewController: UIViewController {
               !categoryName.isEmpty else {
             return
         }
-        
-        AnalyticsService.shared.report(event: isEditingMode ? "category_edited" : "category_created", params: [
-            "category_name_length": categoryName.count,
-            "screen": isEditingMode ? "edit_category" : "add_category"
-        ])
         
         // Вызываем колбэк и закрываем модальное окно
         onCategoryCreated(categoryName)

@@ -110,10 +110,21 @@ final class TrackersViewController: UIViewController {
         setupStores()
         setupCategoryViewModel()
         loadData()
-        AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": "trackers_main",
-            "screen_class": String(describing: type(of: self))
+        // Аналитика: открытие главного экрана
+        AnalyticsService.shared.report(event: "open", params: [
+            "screen": "Main"
         ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Аналитика: закрытие главного экрана
+        if isMovingFromParent {
+            AnalyticsService.shared.report(event: "close", params: [
+                "screen": "Main"
+            ])
+        }
     }
     
     private func setupDatePickerObserver() {
@@ -175,10 +186,6 @@ final class TrackersViewController: UIViewController {
                 self?.categories = self?.trackerStore.fetchCategories() ?? []
                 self?.completedTrackers = self?.recordStore.fetchCompletedTrackers() ?? []
                 self?.filterTrackersForCurrentDate()
-                
-                AnalyticsService.shared.report(event: "categories_updated_in_trackers", params: [
-                    "screen": "trackers_main"
-                ])
             }
         }
     }
@@ -280,10 +287,6 @@ final class TrackersViewController: UIViewController {
         addButton = UIBarButtonItem(
             image: buttonImage,
             primaryAction: UIAction { [weak self] _ in
-                AnalyticsService.shared.report(event: "tracker_creation_opened", params: [
-                    "screen": "trackers_main",
-                    "source": "plus_button"
-                ])
                 self?.didTapAddButton()
             }
         )
@@ -423,11 +426,6 @@ final class TrackersViewController: UIViewController {
             self.filterTrackersForCurrentDate()
             self.updateFilterButtonAppearance()
         }
-        
-        AnalyticsService.shared.report(event: "filter_applied", params: [
-            "filter_type": String(describing: filter),
-            "screen": "trackers_main"
-        ])
     }
     
     // MARK: - Actions
@@ -436,6 +434,11 @@ final class TrackersViewController: UIViewController {
     }
     
     private func didTapAddButton() {
+        // Аналитика: тап на кнопке добавления трека
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Main",
+            "item": "add_track"
+        ])
         let creationVC = CreationTrackerViewController(delegate: self)
         let navigationController = UINavigationController(rootViewController: creationVC)
         present(navigationController, animated: true)
@@ -460,6 +463,11 @@ final class TrackersViewController: UIViewController {
     }
     
     private func didTapFilterButton() {
+        // Аналитика: тап на кнопке фильтра
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Main",
+            "item": "filter"
+        ])
         let filtersVC = TrackerFiltersViewController(selectedFilter: currentFilter)
         filtersVC.onFilterSelected = { [weak self] filter in
             self?.applyFilter(filter)
@@ -470,10 +478,6 @@ final class TrackersViewController: UIViewController {
     }
     
     private func showErrorAlert(message: String) {
-        AnalyticsService.shared.report(event: "error_occurred", params: [
-            "error_message": message,
-            "screen": "trackers_main"
-        ])
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
@@ -503,11 +507,6 @@ extension TrackersViewController: UISearchResultsUpdating, UISearchBarDelegate {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text else { return }
         self.searchText = searchText
-        
-        AnalyticsService.shared.report(event: "search_performed", params: [
-            "search_query": searchText,
-            "query_length": searchText.count
-        ])
         
         filterTrackersForCurrentDate()
     }
@@ -548,7 +547,11 @@ extension TrackersViewController: TrackersDataSourceDelegate {
 extension TrackersViewController: TrackerCellDelegate {
     func didTapPlusButton(in cell: TrackerCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        
+        // Аналитика: тап на треке (кнопка выполнения)
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Main",
+            "item": "track"
+        ])
         let tracker = dataSource.tracker(at: indexPath)
         let trackerId = tracker.idTrackers
         
@@ -556,10 +559,6 @@ extension TrackersViewController: TrackerCellDelegate {
         let selectedDate = Calendar.current.startOfDay(for: currentDate)
         
         guard selectedDate <= today else {
-            AnalyticsService.shared.report(event: "tracker_future_date_attempt", params: [
-                "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
-                "selected_date": dateFormatter.string(from: currentDate)
-            ])
             return
         }
         
@@ -568,16 +567,8 @@ extension TrackersViewController: TrackerCellDelegate {
             
             if wasCompleted {
                 try recordStore.removeRecord(trackerId: trackerId, date: currentDate)
-                AnalyticsService.shared.report(event: "tracker_uncompleted", params: [
-                    "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
-                    "category": tracker.category
-                ])
             } else {
                 try recordStore.addRecord(trackerId: trackerId, date: currentDate)
-                AnalyticsService.shared.report(event: "tracker_completed", params: [
-                    "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit",
-                    "category": tracker.category
-                ])
             }
             
             DispatchQueue.main.async { [weak self] in
@@ -605,35 +596,27 @@ extension TrackersViewController: TrackerCellDelegate {
                 }
             }
         } catch {
-            AnalyticsService.shared.report(event: "tracker_update_error", params: [
-                "error": error.localizedDescription
-            ])
-            showErrorAlert(message: "Не удалось обновить статус трекера")
         }
     }
     
     func didTogglePin(for trackerId: UUID) {
         do {
             try trackerStore.togglePin(for: trackerId)
-            AnalyticsService.shared.report(event: "tracker_pin_toggled", params: [
-                "tracker_id": trackerId.uuidString,
-                "screen": "trackers_main"
-            ])
         } catch {
             showErrorAlert(message: "Не удалось изменить статус закрепления")
         }
     }
     
     func didRequestEdit(for trackerId: UUID) {
+        // Аналитика: выбор редактирования в контекстном меню
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Main",
+            "item": "edit"
+        ])
         guard let tracker = trackerStore.fetchTracker(by: trackerId) else {
             showErrorAlert(message: "Трекер не найден")
             return
         }
-        
-        AnalyticsService.shared.report(event: "tracker_edit_requested", params: [
-            "tracker_id": trackerId.uuidString,
-            "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit"
-        ])
         
         let editVC = CreationTrackerViewController(trackerToEdit: tracker, delegate: self)
         let navigationController = UINavigationController(rootViewController: editVC)
@@ -641,15 +624,15 @@ extension TrackersViewController: TrackerCellDelegate {
     }
     
     func didRequestDelete(for trackerId: UUID) {
+        // Аналитика: выбор удаления в контекстном меню
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Main",
+            "item": "delete"
+        ])
         guard let tracker = trackerStore.fetchTracker(by: trackerId) else {
             showErrorAlert(message: "Трекер не найден")
             return
         }
-        
-        AnalyticsService.shared.report(event: "tracker_delete_requested", params: [
-            "tracker_id": trackerId.uuidString,
-            "tracker_type": tracker.scheduleTrackers.isEmpty ? "event" : "habit"
-        ])
         
         let alert = UIAlertController(
             title: "Уверены что хотите удалить трекер?",

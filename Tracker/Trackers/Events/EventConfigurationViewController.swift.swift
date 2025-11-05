@@ -31,10 +31,22 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        AnalyticsService.shared.report(event: "screen_opened", params: [
-            "screen_name": "EventConfiguration",
-            "screen_class": String(describing: type(of: self))
+        // Аналитика: открытие экрана создания
+        let screenName = trackerToEdit != nil ? "EditEvent" : "NewEvent"
+        AnalyticsService.shared.report(event: "open", params: [
+            "screen": screenName
         ])
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if isMovingFromParent {
+            let screenName = trackerToEdit != nil ? "EditEvent" : "NewEvent"
+            AnalyticsService.shared.report(event: "close", params: [
+                "screen": screenName
+            ])
+        }
     }
     
     // MARK: - Override Setup Methods
@@ -53,9 +65,6 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Action Methods
     override func didTapCategoryButton() {
-        AnalyticsService.shared.report(event: "category_selection_opened", params: [
-            "screen": "event_configuration"
-        ])
         
         let categoryVC = CategorySelectionViewController(selectedCategory: selectedCategory) { [weak self] category in
             self?.selectedCategory = category
@@ -66,10 +75,6 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     override func didTapCancelButton() {
-        AnalyticsService.shared.report(event: "event_creation_cancelled", params: [
-            "screen": "event_configuration"
-        ])
-        
         if let creationVC = navigationController?.viewControllers.first(where: { $0 is CreationTrackerViewController }) {
             navigationController?.popToViewController(creationVC, animated: true)
         } else {
@@ -78,6 +83,12 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     override func didTapCreateButton() {
+        // Аналитика: создание/сохранение трекера
+        let action = trackerToEdit != nil ? "save" : "create"
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "NewEvent",
+            "item": action
+        ])
         guard let trackerName = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trackerName.isEmpty else {
             showError(message: "Введите название события")
@@ -118,11 +129,6 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
                 isPinned: existingTracker.isPinned
             )
             
-            AnalyticsService.shared.report(event: "tracker_edited", params: [
-                "tracker_id": tracker.idTrackers.uuidString,
-                "tracker_type": "event",
-                "category": tracker.category
-            ])
         } else {
             // Создаем новый трекер
             tracker = Tracker(
@@ -134,11 +140,6 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
                 category: selectedCategory
             )
             
-            AnalyticsService.shared.report(event: "tracker_created", params: [
-                "tracker_id": tracker.idTrackers.uuidString,
-                "tracker_type": "event",
-                "category": tracker.category
-            ])
         }
         
         if trackerToEdit != nil {

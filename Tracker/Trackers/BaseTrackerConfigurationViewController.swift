@@ -452,10 +452,6 @@ class BaseTrackerConfigurationViewController: UIViewController {
     }
     
     func showError(message: String) {
-        AnalyticsService.shared.report(event: "error_occurred", params: [
-            "error_message": message,
-            "screen": "trackers_main"
-        ])
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)

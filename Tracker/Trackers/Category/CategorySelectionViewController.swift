@@ -197,10 +197,20 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapAddCategoryButton() {
+        // Аналитика: добавление категории
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Category",
+            "item": "add_category"
+        ])
         presentAddCategoryModal()
     }
     
     private func presentAddCategoryModal(categoryToEdit: String? = nil) {
+        let action = categoryToEdit != nil ? "edit_category" : "add_category"
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Category",
+            "item": action
+        ])
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
             // Этот колбэк вызывается ПОСЛЕ закрытия модального окна
             if let oldCategory = categoryToEdit {
@@ -312,11 +322,6 @@ extension CategorySelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCategory = viewModel.selectCategory(at: indexPath.row)
-        
-        AnalyticsService.shared.report(event: "category_selected", params: [
-            "category_name": selectedCategory,
-            "screen": "category_selection"
-        ])
         
         onCategorySelected(selectedCategory)
         navigationController?.popViewController(animated: true)

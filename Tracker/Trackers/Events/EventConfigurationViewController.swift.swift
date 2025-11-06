@@ -12,11 +12,11 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Properties
     override var navigationTitle: String {
-        return trackerToEdit != nil ? "Редактирование события" : R.string.localizable.irregular_event()
+        return trackerToEdit != nil ? R.string.localizable.edit_event() : R.string.localizable.irregular_event()
     }
     
     override var createButtonTitle: String {
-        return trackerToEdit != nil ? "Сохранить" : R.string.localizable.create()
+        return trackerToEdit != nil ? R.string.localizable.save() : R.string.localizable.create()
     }
     
     // MARK: - Initializer
@@ -91,7 +91,7 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
         ])
         guard let trackerName = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trackerName.isEmpty else {
-            showError(message: "Введите название события")
+            showError(message: R.string.localizable.enter_event_name())
             return
         }
         
@@ -102,17 +102,17 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
         }
         
         guard !selectedEmoji.isEmpty else {
-            showError(message: "Выберите emoji")
+            showError(message: R.string.localizable.select_emoji())
             return
         }
         
         guard selectedColor != .systemRed else {
-            showError(message: "Выберите цвет")
+            showError(message: R.string.localizable.select_color())
             return
         }
         
         guard !selectedCategory.isEmpty else {
-            showError(message: "Выберите категорию")
+            showError(message: R.string.localizable.select_category())
             return
         }
         

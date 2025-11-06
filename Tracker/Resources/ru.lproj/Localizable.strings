@@ -68,3 +68,41 @@
 
 // Days count
 "days_count" = "%d дней"; // Будет переопределено stringsdict
+
+// Filters
+"filters" = "Фильтры";
+"all_trackers" = "Все трекеры";
+"trackers_for_today" = "Трекеры на сегодня";
+"completed" = "Завершенные";
+"uncompleted" = "Не завершенные";
+
+// Statistics
+"statistics" = "Статистика";
+"nothing_to_analyze" = "Анализировать пока нечего";
+"best_period" = "Лучший период";
+"ideal_days" = "Идеальные дни";
+"trackers_completed" = "Трекеров завершено";
+"average_value" = "Среднее значение";
+
+// Alerts and Messages
+"error" = "Ошибка";
+"are_you_sure_category" = "Эта категория точно не нужна?";
+"are_you_sure_tracker" = "Уверены что хотите удалить трекер?";
+"enter_event_name" = "Введите название события";
+"enter_habit_name" = "Введите название привычки";
+"select_schedule" = "Выберите расписание";
+"select_emoji" = "Выберите emoji";
+"select_color" = "Выберите цвет";
+"select_category" = "Выберите категорию";
+
+// Editing
+"edit_category" = "Редактирование категории";
+"edit_habit" = "Редактирование привычки";
+"edit_event" = "Редактирование события";
+
+// Search and Filters
+"nothing_found" = "Ничего не найдено";
+"pinned" = "Закрепленные";
+"pin" = "Закрепить";
+"unpin" = "Открепить";
+"editing" = "Редактирование";

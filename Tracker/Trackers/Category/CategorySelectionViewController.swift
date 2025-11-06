@@ -239,7 +239,7 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Context Menu Actions
     private func makeContextMenu(for category: String, at indexPath: IndexPath) -> UIMenu {
-        let edit = UIAction(title: "Редактировать") { [weak self] _ in
+        let edit = UIAction(title: R.string.localizable.edit()) { [weak self] _ in
             // Сначала закрываем контекстное меню, потом показываем модальное окно
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self?.presentAddCategoryModal(categoryToEdit: category)
@@ -247,7 +247,7 @@ final class CategorySelectionViewController: UIViewController {
         }
         
         let delete = UIAction(
-            title: "Удалить",
+            title: R.string.localizable.delete(),
             attributes: .destructive
         ) { [weak self] _ in
             self?.categoryToDelete = category
@@ -262,16 +262,16 @@ final class CategorySelectionViewController: UIViewController {
     
     private func showDeleteConfirmation(for category: String) {
         let alert = UIAlertController(
-            title: "Эта категория точно не нужна? ",
+            title: R.string.localizable.are_you_sure_category(),
             message: nil,
             preferredStyle: .actionSheet
         )
         
-        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: R.string.localizable.delete(), style: .destructive) { [weak self] _ in
             self?.viewModel.deleteCategory(category)
         })
         
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        alert.addAction(UIAlertAction(title: R.string.localizable.cancel(), style: .cancel))
         
         present(alert, animated: true)
     }

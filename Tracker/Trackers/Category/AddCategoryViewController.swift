@@ -12,7 +12,7 @@ final class AddCategoryViewController: UIViewController {
     // MARK: - Constants
     private enum Constants {
         static let navigationTitle = R.string.localizable.new_category()
-        static let editNavigationTitle = "Редактирование категории"
+        static let editNavigationTitle = R.string.localizable.edit_category()
         static let textFieldPlaceholder = R.string.localizable.enter_category_name()
         static let readyButtonTitle = R.string.localizable.ready()
         

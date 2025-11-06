@@ -66,11 +66,11 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Properties
     override var navigationTitle: String {
-        return trackerToEdit != nil ? "Редактирование привычки" : R.string.localizable.new_habit()
+        return trackerToEdit != nil ? R.string.localizable.edit_habit() : R.string.localizable.new_habit()
     }
     
     override var createButtonTitle: String {
-        return trackerToEdit != nil ? "Сохранить" : R.string.localizable.create()
+        return trackerToEdit != nil ? R.string.localizable.save() : R.string.localizable.create()
     }
     
     // MARK: - Initializer
@@ -199,7 +199,7 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
         ])
         guard let trackerName = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trackerName.isEmpty else {
-            showError(message: "Введите название привычки")
+            showError(message: R.string.localizable.enter_habit_name())
             return
         }
         
@@ -210,22 +210,22 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
         }
         
         guard !selectedSchedule.isEmpty else {
-            showError(message: "Выберите расписание")
+            showError(message: R.string.localizable.select_schedule())
             return
         }
         
         guard !selectedEmoji.isEmpty else {
-            showError(message: "Выберите emoji")
+            showError(message: R.string.localizable.select_emoji())
             return
         }
         
         guard selectedColor != .systemRed else {
-            showError(message: "Выберите цвет")
+            showError(message: R.string.localizable.select_color())
             return
         }
         
         guard !selectedCategory.isEmpty else {
-            showError(message: "Выберите категорию")
+            showError(message: R.string.localizable.select_category())
             return
         }
         

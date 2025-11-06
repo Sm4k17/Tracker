@@ -11,8 +11,8 @@ final class StatisticsViewController: UIViewController {
 
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Статистика"
-        static let placeholderTitle = "Анализировать пока нечего"
+        static let navigationTitle = R.string.localizable.statistics()
+        static let placeholderTitle = R.string.localizable.nothing_to_analyze()
         static let placeholderImageName = "statisticsError"
 
         enum Layout {
@@ -31,10 +31,10 @@ final class StatisticsViewController: UIViewController {
         }
 
         enum Text {
-            static let bestPeriod = "Лучший период"
-            static let idealDays = "Идеальные дни"
-            static let completedTrackers = "Трекеров завершено"
-            static let averageValue = "Среднее значение"
+            static let bestPeriod = R.string.localizable.best_period()
+            static let idealDays = R.string.localizable.ideal_days()
+            static let completedTrackers = R.string.localizable.trackers_completed()
+            static let averageValue = R.string.localizable.average_value()
         }
     }
 

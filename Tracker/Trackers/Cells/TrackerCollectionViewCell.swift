@@ -196,19 +196,19 @@ extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
             self.cardView.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
         }
         
-        let pinTitle = pinIcon.isHidden ? "Закрепить" : "Открепить"
+        let pinTitle = pinIcon.isHidden ? R.string.localizable.pin() : R.string.localizable.unpin()
         
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
             let pin = UIAction(title: pinTitle) { [weak self] _ in
                 self?.delegate?.didTogglePin(for: trackerId)
             }
             
-            let edit = UIAction(title: "Редактировать") { [weak self] _ in
+            let edit = UIAction(title: R.string.localizable.edit()) { [weak self] _ in
                 self?.delegate?.didRequestEdit(for: trackerId)
             }
             
             let delete = UIAction(
-                title: "Удалить",
+                title: R.string.localizable.delete(),
                 attributes: .destructive
             ) { [weak self] _ in
                 self?.delegate?.didRequestDelete(for: trackerId)

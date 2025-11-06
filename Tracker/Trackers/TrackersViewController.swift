@@ -209,7 +209,7 @@ final class TrackersViewController: UIViewController {
         contentView.addSubview(collectionView)
         
         // Filter Button
-        filterButton.setTitle("Фильтры", for: .normal)
+        filterButton.setTitle(R.string.localizable.filters(), for: .normal)
         filterButton.backgroundColor = .ypBlue
         filterButton.setTitleColor(.white, for: .normal)
         filterButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
@@ -592,12 +592,12 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         
         let alert = UIAlertController(
-            title: "Уверены что хотите удалить трекер?",
+            title: R.string.localizable.are_you_sure_tracker(),
             message: nil,
             preferredStyle: .actionSheet
         )
         
-        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: R.string.localizable.delete(), style: .destructive) { [weak self] _ in
             do {
                 try self?.trackerStore.deleteTracker(tracker)
             } catch {
@@ -605,7 +605,7 @@ extension TrackersViewController: TrackerCellDelegate {
             }
         })
         
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        alert.addAction(UIAlertAction(title: R.string.localizable.cancel(), style: .cancel))
         present(alert, animated: true)
     }
 }

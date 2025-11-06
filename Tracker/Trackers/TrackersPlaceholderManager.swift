@@ -40,13 +40,13 @@ final class TrackersPlaceholderManager {
         
         if isEmpty {
             if !searchText.isEmpty {
-                placeholderLabel.text = "Ничего не найдено"
+                placeholderLabel.text = R.string.localizable.nothing_found()
                 placeholderImageView.image = R.image.icSearchEmpty()
             } else if currentFilter == .completed || currentFilter == .uncompleted {
-                placeholderLabel.text = "Ничего не найдено"
+                placeholderLabel.text = R.string.localizable.nothing_found()
                 placeholderImageView.image = R.image.icStatsEmpty() ?? R.image.icDizzy()
             } else {
-                placeholderLabel.text = "Что будем отслеживать?"
+                placeholderLabel.text = R.string.localizable.what_to_track()
                 placeholderImageView.image = R.image.icDizzy()
             }
         }

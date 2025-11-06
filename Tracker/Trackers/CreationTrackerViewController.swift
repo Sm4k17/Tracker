@@ -115,7 +115,7 @@ final class CreationTrackerViewController: UIViewController {
     }
     
     private func setupForEditing(_ tracker: Tracker) {
-        title = "Редактирование"
+        title = R.string.localizable.editing()
         // Заполняем данные трекера для редактирования
         // В зависимости от типа трекера (привычка или событие)
         // переходим в соответствующий контроллер конфигурации

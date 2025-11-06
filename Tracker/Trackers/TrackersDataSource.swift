@@ -126,7 +126,7 @@ final class TrackersDataSource: NSObject {
         var resultCategories: [TrackerCategory] = []
         
         if !pinnedTrackers.isEmpty {
-            let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+            let pinnedCategory = TrackerCategory(title: R.string.localizable.pinned(), trackers: pinnedTrackers)
             resultCategories.append(pinnedCategory)
         }
         

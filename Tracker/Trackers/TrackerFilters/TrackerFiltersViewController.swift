@@ -13,7 +13,12 @@ final class TrackerFiltersViewController: UIViewController {
     var onFilterSelected: ((TrackerFilter) -> Void)?
     
     // MARK: - Private variables
-    private let filterOptions = ["Все трекеры", "Трекеры на сегодня", "Завершенные", "Не завершенные"]
+    private let filterOptions = [
+        R.string.localizable.all_trackers(),
+        R.string.localizable.trackers_for_today(),
+        R.string.localizable.completed(),
+        R.string.localizable.uncompleted()
+    ]
     private var initiallySelectedFilter: TrackerFilter
     private var selectedFilter: TrackerFilter
     
@@ -57,7 +62,7 @@ final class TrackerFiltersViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = "Фильтры"
+        title = R.string.localizable.filters()
         view.backgroundColor = .ypWhite
         view.addSubview(tableView)
         tableView.frame = view.bounds

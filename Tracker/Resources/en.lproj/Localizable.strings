@@ -68,3 +68,45 @@
 
 // Days count
 "days_count" = "%d days";
+
+// Filters
+"filters" = "Filters";
+"all_trackers" = "All Trackers";
+"trackers_for_today" = "Trackers for Today";
+"completed" = "Completed";
+"uncompleted" = "Uncompleted";
+
+// Statistics
+"statistics" = "Statistics";
+"nothing_to_analyze" = "Nothing to analyze yet";
+"best_period" = "Best Period";
+"ideal_days" = "Perfect Days";
+"trackers_completed" = "Trackers Completed";
+"average_value" = "Average Value";
+
+// Context Menu
+"edit" = "Edit";
+"delete" = "Delete";
+
+// Alerts and Messages
+"error" = "Error";
+"are_you_sure_category" = "Are you sure this category is not needed?";
+"are_you_sure_tracker" = "Are you sure you want to delete the tracker?";
+"enter_event_name" = "Enter event name";
+"enter_habit_name" = "Enter habit name";
+"select_schedule" = "Select schedule";
+"select_emoji" = "Select emoji";
+"select_color" = "Select color";
+"select_category" = "Select category";
+
+// Editing
+"edit_category" = "Edit Category";
+"edit_habit" = "Edit Habit";
+"edit_event" = "Edit Event";
+
+// Search and Filters
+"nothing_found" = "Nothing found";
+"pinned" = "Pinned";
+"pin" = "Pin";
+"unpin" = "Unpin";
+"editing" = "Editing";

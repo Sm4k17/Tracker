@@ -58,7 +58,7 @@ final class TrackerFiltersViewController: UIViewController {
     
     private func setupUI() {
         title = "Фильтры"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .ypWhite
         view.addSubview(tableView)
         tableView.frame = view.bounds
     }

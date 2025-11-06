@@ -98,7 +98,7 @@ final class TabBarController: UITabBarController {
     }
 
     private func createStatsViewController() -> UINavigationController {
-        let statsViewController = StatisticViewController()
+        let statsViewController = StatisticsViewController()
         let navigationController = UINavigationController(rootViewController: statsViewController)
         return navigationController
     }

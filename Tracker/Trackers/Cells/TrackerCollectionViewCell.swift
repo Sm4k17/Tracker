@@ -123,11 +123,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupContextMenu() {
-        // Создаем interaction и добавляем ТОЛЬКО к cardView
         contextMenuInteraction = UIContextMenuInteraction(delegate: self)
-        cardView.addInteraction(contextMenuInteraction!)
+        if let interaction = contextMenuInteraction {
+            cardView.addInteraction(interaction)
+        }
         
-        // Делаем cardView доступной для взаимодействий
         cardView.isUserInteractionEnabled = true
     }
     

@@ -84,14 +84,18 @@ final class CreationTrackerViewController: UIViewController {
     private weak var delegate: TrackerViewControllerDelegate?
     private var trackerToEdit: Tracker?
     private var editingCategory: String = ""
+    private var completedDaysForHeader: Int?
     
     // MARK: - Initializer
-    init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
-        self.trackerToEdit = trackerToEdit
-        self.editingCategory = trackerToEdit?.category ?? ""
-        super.init(nibName: nil, bundle: nil)
-        self.delegate = delegate
-    }
+        init(trackerToEdit: Tracker? = nil,
+             delegate: TrackerViewControllerDelegate?,
+             completedDays: Int? = nil) {
+            self.trackerToEdit = trackerToEdit
+            self.editingCategory = trackerToEdit?.category ?? ""
+            self.completedDaysForHeader = completedDays
+            super.init(nibName: nil, bundle: nil)
+            self.delegate = delegate
+        }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -123,14 +127,16 @@ final class CreationTrackerViewController: UIViewController {
             // Нерегулярное событие
             let eventVC = EventConfigurationViewController(
                 trackerToEdit: tracker,
-                delegate: delegate
+                delegate: delegate,
+                completedDays: completedDaysForHeader
             )
             navigationController?.pushViewController(eventVC, animated: false)
         } else {
             // Привычка
             let habitVC = HabitConfigurationViewController(
                 trackerToEdit: tracker,
-                delegate: delegate
+                delegate: delegate,
+                completedDays: completedDaysForHeader
             )
             navigationController?.pushViewController(habitVC, animated: false)
         }

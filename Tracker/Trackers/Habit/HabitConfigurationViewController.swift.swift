@@ -74,17 +74,14 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     // MARK: - Initializer
-    override init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
-        super.init(trackerToEdit: trackerToEdit, delegate: delegate)
-        
-        if let tracker = trackerToEdit {
-            setupHabitEditingData(tracker)
-        }
+    override init(trackerToEdit: Tracker? = nil,
+                  delegate: TrackerViewControllerDelegate?,
+                  completedDays: Int? = nil) {
+        super.init(trackerToEdit: trackerToEdit, delegate: delegate, completedDays: completedDays)
+        if let tracker = trackerToEdit { setupHabitEditingData(tracker) }
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -109,22 +106,23 @@ final class HabitConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Setup Methods
     override func setupContentStack() {
-        [nameTextField, symbolsLimitLabel, categoryScheduleStack, emojiLabel,
-         emojiSelectionView, colorLabel, colorSelectionView].forEach {
-            contentStackView.addArrangedSubview($0)
-        }
+        // добавит хедер дней + базовые элементы, в т.ч. categoryContainer
+        super.setupContentStack()
         
-        updateSpacing()
+        // очищаем внутренности categoryContainer и вставляем свою связку
+        categoryContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        categoryContainer.addArrangedSubview(categoryButton)
+        categoryContainer.addArrangedSubview(separatorView)
+        categoryContainer.addArrangedSubview(scheduleButton)
         
-        // Настраиваем стек категории и расписания
-        categoryScheduleStack.addArrangedSubview(categoryButton)
-        categoryScheduleStack.addArrangedSubview(separatorView)
-        categoryScheduleStack.addArrangedSubview(scheduleButton)
-        
-        categoryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
-        separatorView.heightAnchor.constraint(equalToConstant: HabitConstants.Layout.separatorHeight).isActive = true
-        scheduleButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+        categoryButton.heightAnchor
+            .constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+        separatorView.heightAnchor
+            .constraint(equalToConstant: HabitConstants.Layout.separatorHeight).isActive = true
+        scheduleButton.heightAnchor
+            .constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
     }
+    
     
     override func setupViews() {
         view.addSubview(scrollView)

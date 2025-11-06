@@ -215,12 +215,12 @@ final class StatisticsViewController: UIViewController {
             "statistics_count": statistics != nil ? "4" : "0"
         ])
         
-        guard let s = statistics else { return }
+        guard let statistics = statistics else { return }
         
-        bestPeriodCard.configure(number: "\(s.bestPeriod)", description: Constants.Text.bestPeriod)
-        idealDaysCard.configure(number: "\(s.idealDays)", description: Constants.Text.idealDays)
-        completedTrackersCard.configure(number: "\(s.totalCompleted)", description: Constants.Text.completedTrackers)
-        averageValueCard.configure(number: String(format: "%.1f", s.averageValue), description: Constants.Text.averageValue)
+        bestPeriodCard.configure(number: "\(statistics.bestPeriod)", description: Constants.Text.bestPeriod)
+        idealDaysCard.configure(number: "\(statistics.idealDays)", description: Constants.Text.idealDays)
+        completedTrackersCard.configure(number: "\(statistics.totalCompleted)", description: Constants.Text.completedTrackers)
+        averageValueCard.configure(number: String(format: "%.1f", statistics.averageValue), description: Constants.Text.averageValue)
     }
 }
 

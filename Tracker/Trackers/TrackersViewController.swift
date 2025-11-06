@@ -574,8 +574,12 @@ extension TrackersViewController: TrackerCellDelegate {
             showErrorAlert(message: "Трекер не найден")
             return
         }
+        let completedDays = recordStore.completedDaysCount(for: trackerId)
         
-        let editVC = CreationTrackerViewController(trackerToEdit: tracker, delegate: self)
+        let editVC = CreationTrackerViewController(
+            trackerToEdit: tracker,
+            delegate: self,
+            completedDays: completedDays)
         let navigationController = UINavigationController(rootViewController: editVC)
         present(navigationController, animated: true)
     }

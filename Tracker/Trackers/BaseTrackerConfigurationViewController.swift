@@ -63,6 +63,16 @@ class BaseTrackerConfigurationViewController: UIViewController {
     }
     
     // MARK: - UI Components
+    private let completedDaysForHeader: Int?
+    // Большой заголовок "N дней"
+    private lazy var daysHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.textColor = .ypBlack
+        return label
+    }()
+    
     lazy var scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
@@ -193,9 +203,13 @@ class BaseTrackerConfigurationViewController: UIViewController {
     var createButtonTitle: String { R.string.localizable.create() }
     
     // MARK: - Initializer
-    init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
+    // Инициализатор: добавляем параметр completedDays
+    init(trackerToEdit: Tracker? = nil,
+         delegate: TrackerViewControllerDelegate?,
+         completedDays: Int? = nil) {
         self.trackerToEdit = trackerToEdit
         self.delegate = delegate
+        self.completedDaysForHeader = completedDays
         super.init(nibName: nil, bundle: nil)
         
         if let tracker = trackerToEdit {
@@ -244,12 +258,24 @@ class BaseTrackerConfigurationViewController: UIViewController {
     }
     
     func setupContentStack() {
+        // Если редактируем и есть значение дней — добавляем хедер
+        if trackerToEdit != nil, let completedDaysForHeader {
+            daysHeaderLabel.text = dayString(for: completedDaysForHeader)
+            contentStackView.addArrangedSubview(daysHeaderLabel)
+        }
+        
         // Базовые элементы, могут быть переопределены
         [nameTextField, symbolsLimitLabel, categoryContainer, emojiLabel,
          emojiSelectionView, colorLabel, colorSelectionView].forEach {
             contentStackView.addArrangedSubview($0)
         }
         updateSpacing()
+    }
+    
+    // Унифицированный форматер "N дней" (тот же, что в ячейке)
+    func dayString(for count: Int) -> String {
+        let format = NSLocalizedString("days_count", comment: "Number of days completed")
+        return String.localizedStringWithFormat(format, count)
     }
     
     func setupConstraints() {

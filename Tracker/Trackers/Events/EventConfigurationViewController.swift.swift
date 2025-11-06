@@ -20,13 +20,14 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     }
     
     // MARK: - Initializer
-    override init(trackerToEdit: Tracker? = nil, delegate: TrackerViewControllerDelegate?) {
-        super.init(trackerToEdit: trackerToEdit, delegate: delegate)
+    // Единственный designated init
+    override init(trackerToEdit: Tracker? = nil,
+                  delegate: TrackerViewControllerDelegate?,
+                  completedDays: Int? = nil) {
+        super.init(trackerToEdit: trackerToEdit, delegate: delegate, completedDays: completedDays)
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -51,17 +52,15 @@ final class EventConfigurationViewController: BaseTrackerConfigurationViewContro
     
     // MARK: - Override Setup Methods
     override func setupContentStack() {
-        [nameTextField, symbolsLimitLabel, categoryContainer, emojiLabel,
-         emojiSelectionView, colorLabel, colorSelectionView].forEach {
-            contentStackView.addArrangedSubview($0)
-        }
+        // добавит хедер дней + базовые элементы
+        super.setupContentStack()
         
-        updateSpacing()
-        
-        // Для событий используем простой контейнер категории
+        // наполняем контейнер категории (который уже добавлен супер-классом)
         categoryContainer.addArrangedSubview(categoryButton)
-        categoryButton.heightAnchor.constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
+        categoryButton.heightAnchor
+            .constraint(equalToConstant: Constants.Layout.dropdownItemHeight).isActive = true
     }
+    
     
     // MARK: - Override Action Methods
     override func didTapCategoryButton() {

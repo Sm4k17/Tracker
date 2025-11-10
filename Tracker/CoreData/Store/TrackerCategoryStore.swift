@@ -7,11 +7,6 @@
 
 import CoreData
 
-// MARK: - Constants
-private enum CoreDataKeys {
-    static let title = "title"
-}
-
 final class TrackerCategoryStore: NSObject {
     
     // MARK: - Properties
@@ -31,7 +26,7 @@ final class TrackerCategoryStore: NSObject {
     private func setupFetchedResultsController() {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         request.sortDescriptors = [
-            NSSortDescriptor(key: CoreDataKeys.title, ascending: true)
+            NSSortDescriptor(key: "title", ascending: true)
         ]
         
         fetchedResultsController = NSFetchedResultsController(
@@ -93,19 +88,46 @@ final class TrackerCategoryStore: NSObject {
         try context.save()
     }
     
+    func updateCategory(from oldName: String, to newName: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", oldName)
+        
+        if let categoryToUpdate = try context.fetch(request).first {
+            categoryToUpdate.title = newName
+            
+            // Обновляем трекеры через TrackerStore
+            let trackerStore = TrackerStore()
+            try trackerStore.updateTrackersCategory(from: oldName, to: newName)
+            
+            try context.save()
+        } else {
+            throw NSError(domain: "CategoryStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Категория не найдена"])
+        }
+    }
+    
     func deleteCategory(title: String) throws {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
+        request.predicate = NSPredicate(format: "title == %@", title)
         
         if let categoryToDelete = try context.fetch(request).first {
+            // Удаляем все трекеры в этой категории
+            if let trackers = categoryToDelete.trackers as? Set<TrackerCoreData> {
+                for tracker in trackers {
+                    context.delete(tracker)
+                }
+            }
+            
+            // Удаляем саму категорию
             context.delete(categoryToDelete)
             try context.save()
+        } else {
+            throw NSError(domain: "CategoryStore", code: 404, userInfo: [NSLocalizedDescriptionKey: "Категория не найдена"])
         }
     }
     
     func fetchOrCreateCategory(title: String) -> TrackerCategoryCoreData {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
+        request.predicate = NSPredicate(format: "title == %@", title)
         
         if let existingCategory = try? context.fetch(request).first {
             return existingCategory
@@ -116,12 +138,17 @@ final class TrackerCategoryStore: NSObject {
         return newCategory
     }
     
-    func isCategoryEmpty(title: String) -> Bool {
+    func isCategoryNameUnique(_ name: String) -> Bool {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "\(CoreDataKeys.title) == %@", title)
+        request.predicate = NSPredicate(format: "title == %@", name)
         
-        guard let category = try? context.fetch(request).first else { return true }
-        return (category.trackers?.count ?? 0) == 0
+        do {
+            let existingCategories = try context.fetch(request)
+            return existingCategories.isEmpty
+        } catch {
+            print("❌ Error checking category uniqueness: \(error)")
+            return false
+        }
     }
 }
 

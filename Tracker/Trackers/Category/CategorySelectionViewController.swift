@@ -12,10 +12,9 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Категория"
-        static let addCategoryButtonTitle = "Добавить категорию"
-        static let placeholderTitle = "Привычки и события можно\nобъединить по смыслу"
-        static let placeholderImageName = "icDizzy"
+        static let navigationTitle = R.string.localizable.category()
+        static let addCategoryButtonTitle = R.string.localizable.add_category()
+        static let placeholderTitle = R.string.localizable.what_to_track()
         
         static let buttonHorizontalInset: CGFloat = 20
         static let buttonBottomOffset: CGFloat = 16
@@ -71,8 +70,7 @@ final class CategorySelectionViewController: UIViewController {
     }()
     
     private lazy var placeholderImageView: UIImageView = {
-        let image = UIImage(named: Constants.placeholderImageName)
-        let imageView = UIImageView(image: image)
+        let imageView = UIImageView(image: UIImage(named: "icDizzy"))
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.isHidden = false
@@ -105,6 +103,7 @@ final class CategorySelectionViewController: UIViewController {
     private let viewModel: CategoryViewModel
     private let selectedCategory: String
     private let onCategorySelected: (String) -> Void
+    private var categoryToDelete: String?
     
     // MARK: - Initializer
     init(selectedCategory: String, onCategorySelected: @escaping (String) -> Void) {
@@ -124,7 +123,11 @@ final class CategorySelectionViewController: UIViewController {
         setupUI()
         setupNavigationBar()
         setupBindings()
-        viewModel.loadCategories()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateUIState()
     }
     
     // MARK: - Setup
@@ -137,7 +140,6 @@ final class CategorySelectionViewController: UIViewController {
     private func setupNavigationBar() {
         title = Constants.navigationTitle
         navigationItem.hidesBackButton = true
-        navigationItem.leftBarButtonItem = nil
     }
     
     private func setupViews() {
@@ -175,13 +177,7 @@ final class CategorySelectionViewController: UIViewController {
         viewModel.categoriesDidUpdate = { [weak self] in
             DispatchQueue.main.async {
                 self?.updateUIState()
-            }
-        }
-        
-        viewModel.onCategoryAdded = { [weak self] indexPath in
-            DispatchQueue.main.async {
-                self?.updateUIState()
-                self?.tableView.insertRows(at: [indexPath], with: .automatic) // Плавное добавление
+                self?.tableView.reloadData()
             }
         }
         
@@ -201,15 +197,82 @@ final class CategorySelectionViewController: UIViewController {
     
     // MARK: - Actions
     private func didTapAddCategoryButton() {
+        // Аналитика: добавление категории
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Category",
+            "item": "add_category"
+        ])
+        presentAddCategoryModal()
+    }
+    
+    private func presentAddCategoryModal(categoryToEdit: String? = nil) {
+        let action = categoryToEdit != nil ? "edit_category" : "add_category"
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "Category",
+            "item": action
+        ])
         let addCategoryVC = AddCategoryViewController { [weak self] newCategory in
-            self?.viewModel.createCategory(title: newCategory)
+            // Этот колбэк вызывается ПОСЛЕ закрытия модального окна
+            if let oldCategory = categoryToEdit {
+                // Редактируем существующую категорию
+                self?.viewModel.updateCategory(from: oldCategory, to: newCategory)
+            } else {
+                // Создаем новую категорию
+                self?.viewModel.createCategory(title: newCategory)
+            }
         }
-        navigationController?.pushViewController(addCategoryVC, animated: true)
+        
+        // Если редактируем, устанавливаем текущее название
+        if let categoryToEdit = categoryToEdit {
+            addCategoryVC.setExistingCategoryName(categoryToEdit)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: addCategoryVC)
+        present(navigationController, animated: true)
     }
     
     private func showError(_ message: String) {
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Context Menu Actions
+    private func makeContextMenu(for category: String, at indexPath: IndexPath) -> UIMenu {
+        let edit = UIAction(title: R.string.localizable.edit()) { [weak self] _ in
+            // Сначала закрываем контекстное меню, потом показываем модальное окно
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.presentAddCategoryModal(categoryToEdit: category)
+            }
+        }
+        
+        let delete = UIAction(
+            title: R.string.localizable.delete(),
+            attributes: .destructive
+        ) { [weak self] _ in
+            self?.categoryToDelete = category
+            // Сначала закрываем контекстное меню, потом показываем action sheet
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.showDeleteConfirmation(for: category)
+            }
+        }
+        
+        return UIMenu(title: "", children: [edit, delete])
+    }
+    
+    private func showDeleteConfirmation(for category: String) {
+        let alert = UIAlertController(
+            title: R.string.localizable.are_you_sure_category(),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        alert.addAction(UIAlertAction(title: R.string.localizable.delete(), style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteCategory(category)
+        })
+        
+        alert.addAction(UIAlertAction(title: R.string.localizable.cancel(), style: .cancel))
+        
         present(alert, animated: true)
     }
 }
@@ -228,7 +291,7 @@ extension CategorySelectionViewController: UITableViewDataSource {
         cell.textLabel?.text = category
         cell.textLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.textColor = .ypBlack
-        cell.backgroundColor = .ypBackgroundDay
+        cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         
         // Галочка для выбранной категории
@@ -259,7 +322,17 @@ extension CategorySelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCategory = viewModel.selectCategory(at: indexPath.row)
+        
         onCategorySelected(selectedCategory)
         navigationController?.popViewController(animated: true)
+    }
+    
+    // MARK: - Context Menu
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let category = viewModel.categories[indexPath.row]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            return self?.makeContextMenu(for: category, at: indexPath)
+        }
     }
 }

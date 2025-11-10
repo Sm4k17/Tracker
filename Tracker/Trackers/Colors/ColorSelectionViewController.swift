@@ -86,6 +86,14 @@ final class ColorSelectionView: UIView {
     }
     
     // MARK: - Public Methods
+    func selectColor(_ color: UIColor) {
+        if let index = Constants.colors.firstIndex(where: { $0.isEqual(color) }) {
+            let indexPath = IndexPath(item: index, section: 0)
+            collectionView.selectItem(at: indexPath, animated: false, scrollPosition: .centeredVertically)
+            collectionView(collectionView, didSelectItemAt: indexPath)
+        }
+    }
+    
     func setSelectedColor(_ color: UIColor) {
         let oldSelectedColor = selectedColor
         selectedColor = color

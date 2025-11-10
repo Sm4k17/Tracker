@@ -12,9 +12,9 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Constants
     private enum Constants {
-        static let navigationTitle = "Создание трекера"
-        static let regularTracker = "Привычка"
-        static let irregularTracker = "Нерегулярное событие"
+        static let navigationTitle = R.string.localizable.trackers()
+        static let regularTracker = R.string.localizable.regular_tracker()
+        static let irregularTracker = R.string.localizable.irregular_tracker()
         
         // Константы для размеров и отступов
         enum Layout {
@@ -82,12 +82,20 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Properties
     private weak var delegate: TrackerViewControllerDelegate?
+    private var trackerToEdit: Tracker?
+    private var editingCategory: String = ""
+    private var completedDaysForHeader: Int?
     
     // MARK: - Initializer
-    init(delegate: TrackerViewControllerDelegate?) {
-        self.delegate = delegate
-        super.init(nibName: nil, bundle: nil)
-    }
+        init(trackerToEdit: Tracker? = nil,
+             delegate: TrackerViewControllerDelegate?,
+             completedDays: Int? = nil) {
+            self.trackerToEdit = trackerToEdit
+            self.editingCategory = trackerToEdit?.category ?? ""
+            self.completedDaysForHeader = completedDays
+            super.init(nibName: nil, bundle: nil)
+            self.delegate = delegate
+        }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -98,6 +106,9 @@ final class CreationTrackerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
+        if let tracker = trackerToEdit {
+            setupForEditing(tracker)
+        }
     }
     
     // MARK: - Setup
@@ -105,6 +116,30 @@ final class CreationTrackerViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupViews()
         setupConstraints()
+    }
+    
+    private func setupForEditing(_ tracker: Tracker) {
+        title = R.string.localizable.editing()
+        // Заполняем данные трекера для редактирования
+        // В зависимости от типа трекера (привычка или событие)
+        // переходим в соответствующий контроллер конфигурации
+        if tracker.scheduleTrackers.isEmpty {
+            // Нерегулярное событие
+            let eventVC = EventConfigurationViewController(
+                trackerToEdit: tracker,
+                delegate: delegate,
+                completedDays: completedDaysForHeader
+            )
+            navigationController?.pushViewController(eventVC, animated: false)
+        } else {
+            // Привычка
+            let habitVC = HabitConfigurationViewController(
+                trackerToEdit: tracker,
+                delegate: delegate,
+                completedDays: completedDaysForHeader
+            )
+            navigationController?.pushViewController(habitVC, animated: false)
+        }
     }
     
     private func setupNavigationBar() {
@@ -145,10 +180,20 @@ final class CreationTrackerViewController: UIViewController {
     
     // MARK: - Actions
     private func regularTrackerButtonTapped() {
+        // Аналитика: выбор привычки
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "TrackerType",
+            "item": "habit"
+        ])
         navigateToTrackerCreation(isRegular: true)
     }
     
     private func irregularTrackerButtonTapped() {
+        // Аналитика: выбор события
+        AnalyticsService.shared.report(event: "click", params: [
+            "screen": "TrackerType",
+            "item": "event"
+        ])
         navigateToTrackerCreation(isRegular: false)
     }
     

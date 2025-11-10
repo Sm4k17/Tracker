@@ -16,24 +16,26 @@ struct Tracker {
     let emoji: String
     let scheduleTrackers: Set<Week>
     let category: String
+    var isPinned: Bool = false
 }
 
 // Для удобства создания
-    extension Tracker {
-        init(name: String, color: UIColor, emoji: String, schedule: Set<Week>, category: String = "") {
-            self.idTrackers = UUID()
-            self.name = name
-            self.color = color
-            self.emoji = emoji
-            self.scheduleTrackers = schedule
-            self.category = category
-        }
+extension Tracker {
+    init(name: String, color: UIColor, emoji: String, schedule: Set<Week>, category: String = "") {
+        self.idTrackers = UUID()
+        self.name = name
+        self.color = color
+        self.emoji = emoji
+        self.scheduleTrackers = schedule
+        self.category = category
+        self.isPinned = false
     }
+}
 
 /*
  Tracker - основная бизнес-модель
-
+ 
  Назначение: Хранит все данные о трекере
  Использование: Создание, отображение, фильтрация трекеров
  Ключевые поля: расписание, цвет, emoji, категория
-*/
+ */

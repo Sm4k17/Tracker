@@ -1,0 +1,112 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Рустам Ханахмедов on 25.10.2025.
+  
+*/
+
+// Localizable.strings (French)
+
+// Common
+"cancel" = "Annuler";
+"create" = "Créer";
+"ready" = "Prêt";
+"add" = "Ajouter";
+"delete" = "Supprimer";
+"edit" = "Modifier";
+"save" = "Enregistrer";
+
+// Navigation Titles
+"trackers" = "Trackers";
+"stats" = "Statistiques";
+"new_habit" = "Nouvelle Habitude";
+"irregular_event" = "Événement Irrégulier";
+"category" = "Catégorie";
+"schedule" = "Planning";
+"new_category" = "Nouvelle Catégorie";
+
+// Placeholders
+"enter_tracker_name" = "Entrez le nom du tracker";
+"enter_category_name" = "Entrez le nom de la catégorie";
+"search" = "Rechercher";
+"what_to_track" = "Que voulons-nous suivre ?";
+
+// Buttons
+"add_category" = "Ajouter une catégorie";
+"regular_tracker" = "Habitude";
+"irregular_tracker" = "Événement irrégulier";
+
+// Sections
+"emoji" = "Emoji";
+"color" = "Couleur";
+
+// Messages
+"symbols_limit" = "Limite de 38 caractères";
+"track_only_what_you_want" = "Suivez seulement ce que vous voulez";
+"even_if_not_water_and_yoga" = "Même si ce ne sont pas\ndes litres d'eau et du yoga";
+"cool_technologies" = "Voilà des technologies sympas !";
+
+// Days
+"monday" = "Lundi";
+"tuesday" = "Mardi";
+"wednesday" = "Mercredi";
+"thursday" = "Jeudi";
+"friday" = "Vendredi";
+"saturday" = "Samedi";
+"sunday" = "Dimanche";
+"every_day" = "Tous les jours";
+
+// Days short
+"mon" = "Lun";
+"tue" = "Mar";
+"wed" = "Mer";
+"thu" = "Jeu";
+"fri" = "Ven";
+"sat" = "Sam";
+"sun" = "Dim";
+
+// Days count
+"days_count" = "%d jours";
+
+// Filters
+"filters" = "Filtres";
+"all_trackers" = "Tous les trackers";
+"trackers_for_today" = "Trackers pour aujourd'hui";
+"completed" = "Terminés";
+"uncompleted" = "Non terminés";
+
+// Statistics
+"statistics" = "Statistiques";
+"nothing_to_analyze" = "Rien à analyser pour l'instant";
+"best_period" = "Meilleure période";
+"ideal_days" = "Jours parfaits";
+"trackers_completed" = "Trackers terminés";
+"average_value" = "Valeur moyenne";
+
+// Context Menu
+"edit" = "Modifier";
+"delete" = "Supprimer";
+
+// Alerts and Messages
+"error" = "Erreur";
+"are_you_sure_category" = "Êtes-vous sûr que cette catégorie n'est pas nécessaire ?";
+"are_you_sure_tracker" = "Êtes-vous sûr de vouloir supprimer le tracker ?";
+"enter_event_name" = "Entrez le nom de l'événement";
+"enter_habit_name" = "Entrez le nom de l'habitude";
+"select_schedule" = "Sélectionnez le planning";
+"select_emoji" = "Sélectionnez un emoji";
+"select_color" = "Sélectionnez une couleur";
+"select_category" = "Sélectionnez une catégorie";
+
+// Editing
+"edit_category" = "Modifier la catégorie";
+"edit_habit" = "Modifier l'habitude";
+"edit_event" = "Modifier l'événement";
+
+// Search and Filters
+"nothing_found" = "Rien n'a été trouvé";
+"pinned" = "Épinglés";
+"pin" = "Épingler";
+"unpin" = "Désépingler";
+"editing" = "Modification";

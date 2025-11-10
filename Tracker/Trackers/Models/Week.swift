@@ -16,34 +16,34 @@ enum Week: Int, CaseIterable {
     case saturday = 6
     case sunday = 7
     
-    var title: String {
+    var localizedTitle: String {
         switch self {
-        case .monday: return "Понедельник"
-        case .tuesday: return "Вторник"
-        case .wednesday: return "Среда"
-        case .thursday: return "Четверг"
-        case .friday: return "Пятница"
-        case .saturday: return "Суббота"
-        case .sunday: return "Воскресенье"
+        case .monday: return R.string.localizable.monday()
+        case .tuesday: return R.string.localizable.tuesday()
+        case .wednesday: return R.string.localizable.wednesday()
+        case .thursday: return R.string.localizable.thursday()
+        case .friday: return R.string.localizable.friday()
+        case .saturday: return R.string.localizable.saturday()
+        case .sunday: return R.string.localizable.sunday()
         }
     }
     
-    var shortTitle: String {
+    var localizedShortTitle: String {
         switch self {
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        case .sunday: return "Вс"
+        case .monday: return R.string.localizable.mon()
+        case .tuesday: return R.string.localizable.tue()
+        case .wednesday: return R.string.localizable.wed()
+        case .thursday: return R.string.localizable.thu()
+        case .friday: return R.string.localizable.fri()
+        case .saturday: return R.string.localizable.sat()
+        case .sunday: return R.string.localizable.sun()
         }
     }
 }
 
 /*
  Week - модель расписания
-
+ 
  Назначение: Определение дней показа трекера
  Использование: Фильтрация по дате, настройка расписания
  */

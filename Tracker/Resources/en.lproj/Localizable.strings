@@ -1,0 +1,112 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Рустам Ханахмедов on 25.10.2025.
+  
+*/
+
+// Localizable.strings (English)
+
+// Common
+"cancel" = "Cancel";
+"create" = "Create";
+"ready" = "Ready";
+"add" = "Add";
+"delete" = "Delete";
+"edit" = "Edit";
+"save" = "Save";
+
+// Navigation Titles
+"trackers" = "Trackers";
+"stats" = "Statistics";
+"new_habit" = "New Habit";
+"irregular_event" = "Irregular Event";
+"category" = "Category";
+"schedule" = "Schedule";
+"new_category" = "New Category";
+
+// Placeholders
+"enter_tracker_name" = "Enter tracker name";
+"enter_category_name" = "Enter category name";
+"search" = "Search";
+"what_to_track" = "What shall we track?";
+
+// Buttons
+"add_category" = "Add Category";
+"regular_tracker" = "Habit";
+"irregular_tracker" = "Irregular Event";
+
+// Sections
+"emoji" = "Emoji";
+"color" = "Color";
+
+// Messages
+"symbols_limit" = "38 character limit";
+"track_only_what_you_want" = "Track only what you want";
+"even_if_not_water_and_yoga" = "Even if it's not\nliters of water and yoga";
+"cool_technologies" = "That's some cool technology!";
+
+// Days
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+"every_day" = "Every day";
+
+// Days short
+"mon" = "Mon";
+"tue" = "Tue";
+"wed" = "Wed";
+"thu" = "Thu";
+"fri" = "Fri";
+"sat" = "Sat";
+"sun" = "Sun";
+
+// Days count
+"days_count" = "%d days";
+
+// Filters
+"filters" = "Filters";
+"all_trackers" = "All Trackers";
+"trackers_for_today" = "Trackers for Today";
+"completed" = "Completed";
+"uncompleted" = "Uncompleted";
+
+// Statistics
+"statistics" = "Statistics";
+"nothing_to_analyze" = "Nothing to analyze yet";
+"best_period" = "Best Period";
+"ideal_days" = "Perfect Days";
+"trackers_completed" = "Trackers Completed";
+"average_value" = "Average Value";
+
+// Context Menu
+"edit" = "Edit";
+"delete" = "Delete";
+
+// Alerts and Messages
+"error" = "Error";
+"are_you_sure_category" = "Are you sure this category is not needed?";
+"are_you_sure_tracker" = "Are you sure you want to delete the tracker?";
+"enter_event_name" = "Enter event name";
+"enter_habit_name" = "Enter habit name";
+"select_schedule" = "Select schedule";
+"select_emoji" = "Select emoji";
+"select_color" = "Select color";
+"select_category" = "Select category";
+
+// Editing
+"edit_category" = "Edit Category";
+"edit_habit" = "Edit Habit";
+"edit_event" = "Edit Event";
+
+// Search and Filters
+"nothing_found" = "Nothing found";
+"pinned" = "Pinned";
+"pin" = "Pin";
+"unpin" = "Unpin";
+"editing" = "Editing";

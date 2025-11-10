@@ -20,12 +20,18 @@ final class OnboardingPageViewController: UIViewController {
         static let buttonCornerRadius: CGFloat = 16
         static let titleFontSize: CGFloat = 32
         static let buttonFontSize: CGFloat = 16
+        
+        // Статические цвета для онбординга
+        static let backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        static let textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        static let buttonBackgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        static let buttonTextColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
     }
     
     // MARK: - UI Components
     private lazy var backgroundImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: page.imageName)
+        imageView.image = page.image
         imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -37,17 +43,17 @@ final class OnboardingPageViewController: UIViewController {
         label.text = page.titleText
         label.numberOfLines = 2
         label.textAlignment = .center
-        label.textColor = .ypBlack
+        label.textColor = Constants.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(R.string.localizable.cool_technologies(), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: Constants.buttonFontSize, weight: .medium)
-        button.setTitleColor(.ypWhite, for: .normal)
-        button.backgroundColor = .ypBlack
+        button.setTitleColor(Constants.buttonTextColor, for: .normal)
+        button.backgroundColor = Constants.buttonBackgroundColor
         button.layer.cornerRadius = Constants.buttonCornerRadius
         button.layer.masksToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -80,7 +86,7 @@ final class OnboardingPageViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupUI() {
-        view.backgroundColor = .ypWhite
+        view.backgroundColor = Constants.backgroundColor
         setupViews()
         setupConstraints()
     }
@@ -101,25 +107,26 @@ final class OnboardingPageViewController: UIViewController {
             
             // Title Label
             titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                                               constant: Constants.horizontalPadding),
+                                                constant: Constants.horizontalPadding),
             titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                                                constant: -Constants.horizontalPadding),
+                                                 constant: -Constants.horizontalPadding),
             titleLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                              constant: -Constants.bottomOffset),
+                                               constant: -Constants.bottomOffset),
             
             // Action Button
             actionButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor,
-                                                 constant: Constants.horizontalInset),
+                                                  constant: Constants.horizontalInset),
             actionButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                                                  constant: -Constants.horizontalInset),
+                                                   constant: -Constants.horizontalInset),
             actionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                                constant: -Constants.bottomButtonOffset),
+                                                 constant: -Constants.bottomButtonOffset),
             actionButton.heightAnchor.constraint(equalToConstant: Constants.buttonHeight)
         ])
     }
     
     // MARK: - Actions
     private func didTapActionButton() {
+        
         // Сохраняем факт прохождения онбординга
         OnboardingStorage.isOnboardingCompleted = true
         
